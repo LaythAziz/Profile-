@@ -67,7 +67,8 @@ section.content-section{padding:105px 0;border-top:1px solid var(--line);positio
 </main>
 <footer class="footer"><div class="wrap footer-inner"><strong>LAITH AZIZ <span>AL-MOUSAWI</span></strong><span>© ٢٠٢٦ ليث عزيز الموسوي — جميع الحقوق محفوظة</span><a href="#home" style="color:var(--lime)">العودة للأعلى <span class="code-mark" aria-hidden="true">&lt;/&gt;</span></a></div></footer>
 <script>
-const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;\ndocument.querySelectorAll('.skill').forEach(skill=>skill.addEventListener('click',()=>{const active=skill.getAttribute('aria-pressed')==='true';skill.setAttribute('aria-pressed',String(!active));}));
+const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.querySelectorAll('.skill').forEach(skill=>skill.addEventListener('click',()=>{const active=skill.getAttribute('aria-pressed')==='true';skill.setAttribute('aria-pressed',String(!active));}));
 const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');revealObserver.unobserve(entry.target)}}),{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
 const sections=[...document.querySelectorAll('main section[id]')],navLinks=[...document.querySelectorAll('.navlinks a')],progress=document.querySelector('#progress');
