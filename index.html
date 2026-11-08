@@ -196,6 +196,18 @@ document.querySelector('[data-copy-payment]')?.addEventListener('click',async()=
 document.querySelector('#serviceForm')?.addEventListener('submit',e=>{e.preventDefault();const user=document.querySelector('#igUser').value.trim();const note=document.querySelector('#orderNote').value.trim();const msg='طلب خدمة Instagram من بروفايل ليث%0Aاسم المستخدم: '+encodeURIComponent(user)+'%0Aالسعر المعروض: 20,000 د.ع%0Aملاحظة: '+encodeURIComponent(note||'—')+'%0Aسأرفق إثبات التحويل في المحادثة.';window.open('https://t.me/share/url?url='+encodeURIComponent('https://github.com/LaythAziz/Profile-')+'&text='+msg,'_blank','noopener,noreferrer');});
 
 </script>
+<script>
+/* Prevent browsers from restoring a previous scroll position on refresh
+   or re-opening an old section hash automatically. */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+window.addEventListener('pageshow', () => {
+  if (!sessionStorage.getItem('portfolio-navigation')) window.scrollTo({top:0,left:0,behavior:'instant'});
+});
+document.querySelectorAll('.navlinks a, a[href^="#"]').forEach(link => {
+  link.addEventListener('click', () => sessionStorage.setItem('portfolio-navigation','1'));
+});
+</script>
 </body></html>
 <style>
 /* Tellonym brand mark: inline SVG, independent of external image hosts */
