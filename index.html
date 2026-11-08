@@ -197,17 +197,10 @@ document.querySelector('#serviceForm')?.addEventListener('submit',e=>{e.preventD
 
 </script>
 <script>
-/* Prevent browsers from restoring a previous scroll position on refresh
-   or re-opening an old section hash automatically. */
+/* Always start at the hero on a fresh load/refresh; in-page links still work normally. */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-window.addEventListener('pageshow', () => {
-  if (!sessionStorage.getItem('portfolio-navigation')) window.scrollTo({top:0,left:0,behavior:'instant'});
-});
-document.querySelectorAll('.navlinks a, a[href^="#"]').forEach(link => {
-  link.addEventListener('click', () => sessionStorage.setItem('portfolio-navigation','1'));
-});
-</script>
+window.addEventListener('pageshow', () => window.scrollTo({top:0,left:0,behavior:'instant'}));
 </body></html>
 <style>
 /* Tellonym brand mark: inline SVG, independent of external image hosts */
