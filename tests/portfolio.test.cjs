@@ -113,3 +113,13 @@ test('service checkout validates Instagram usernames and builds a readable Teleg
   assert.ok(js.includes("].join('\\n')"));
   assert.match(js, /replace\(\/\^@\//);
 });
+
+
+test('admin email OTP input accepts Supabase codes from 6 through 10 digits', () => {
+  const adminHtml = fs.readFileSync(path.join(root, 'admin.html'), 'utf8');
+  const adminJs = fs.readFileSync(path.join(root, 'assets/admin.js'), 'utf8');
+  assert.match(adminHtml, /pattern="\[0-9\]\{6,10\}"/);
+  assert.match(adminHtml, /maxlength="10" minlength="6"/);
+  assert.match(adminJs, /\/\^\\d\{6,10\}\$\//);
+  assert.match(adminJs, /token,\s*type:\s*'email'/);
+});
