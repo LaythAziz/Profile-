@@ -14,6 +14,9 @@ const sendButton = document.querySelector('#send-code');
 const verifyButton = document.querySelector('#verify-code');
 const resendButton = document.querySelector('#resend-code');
 const otpInput = document.querySelector('#otp');
+const emailInput = document.querySelector('#email');
+
+function enteredEmail() { return emailInput.value.trim().toLowerCase(); }
 
 function message(text, error = false) {
   feedback.textContent = text;
@@ -22,11 +25,14 @@ function message(text, error = false) {
 function busy(button, value) { button.disabled = value; }
 
 async function sendCode() {
+  const email = enteredEmail();
+  if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return message('اكتب بريداً إلكترونياً صحيحاً أولاً.', true);
+  if (email !== OWNER_EMAIL) return message('هذا البريد غير مخوّل للدخول إلى لوحة الإدارة.', true);
   busy(sendButton, true);
   message('جارٍ إرسال رمز التحقق إلى Gmail…');
   try {
     const { error } = await supabase.auth.signInWithOtp({
-      email: OWNER_EMAIL,
+      email,
       options: { shouldCreateUser: false }
     });
     if (error) throw error;
@@ -35,7 +41,12 @@ async function sendCode() {
     otpInput.focus();
     message('تم إرسال رمز التحقق. افتح Gmail وانسخ الرمز المكوّن من 6 أرقام، ثم أدخله هنا.');
   } catch (error) {
-    message(error.message || 'تعذر إرسال الرمز. انتظر قليلاً ثم حاول مجدداً، وتحقق من مجلد Spam.', true);
+    const detail = String(error.message || '');
+    if (/rate limit|too many requests|over_email_send_rate_limit/i.test(detail)) {
+      message('خدمة البريد وصلت حد الإرسال المؤقت. لا تضغط إرسال مرة أخرى الآن؛ نحتاج تفعيل SMTP مخصص ثم نعيد المحاولة.', true);
+    } else {
+      message(detail || 'تعذر إرسال الرمز. تحقق من البريد وحاول لاحقاً.', true);
+    }
   } finally { busy(sendButton, false); }
 }
 
@@ -50,12 +61,12 @@ verifyForm.addEventListener('submit', async event => {
   message('جارٍ التحقق من الرمز والصلاحيات…');
   try {
     const { data, error } = await supabase.auth.verifyOtp({
-      email: OWNER_EMAIL,
+      email: enteredEmail(),
       token,
       type: 'email'
     });
     if (error) throw error;
-    if (!data.user || data.user.email?.toLowerCase() !== OWNER_EMAIL) {
+    if (!data.user || data.user.email?.toLowerCase() !== enteredEmail() || data.user.email?.toLowerCase() !== OWNER_EMAIL) {
       await supabase.auth.signOut();
       throw new Error('هذا الحساب غير مخوّل للدخول.');
     }
