@@ -52,10 +52,10 @@ if(particlesEnabled&&canvas&&ctx){
   order.classList.add('visible');
   order.scrollIntoView({behavior:'smooth',block:'start'});
  };
- document.querySelectorAll('[data-open-order]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();openOrder();}));
+ document.querySelectorAll('[data-open-order]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();const field=document.getElementById('orderNote');if(field&&!field.value.trim())field.value='طلب عام من باقة Instagram — أرجو التواصل لتحديد الخدمة';openOrder();}));
  document.querySelectorAll('.offer-item').forEach(item=>{
   item.setAttribute('tabindex','0');item.setAttribute('role','button');
-  item.addEventListener('click',()=>{const label=item.innerText.replace(/^\\s*\\d+\\s*/, '').trim();const field=document.getElementById('orderNote');if(field)field.value=label;openOrder();});
+  item.addEventListener('click',()=>{const label=item.innerText.replace(/^\s*\d+\s*/, '').trim();const field=document.getElementById('orderNote');if(field)field.value=label;openOrder();});
   item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();item.click();}});
  });
  search?.addEventListener('input',()=>{
@@ -75,9 +75,22 @@ if(particlesEnabled&&canvas&&ctx){
  });
  document.querySelector('#serviceForm')?.addEventListener('submit',event=>{
   event.preventDefault();
-  const user=document.querySelector('#igUser').value.trim();
+  const input=document.querySelector('#igUser');
+  const user=input.value.trim().replace(/^@/,'');
+  if(!/^[a-zA-Z0-9._]{1,30}$/.test(user)){
+   input.setCustomValidity('اكتب اسم مستخدم Instagram صحيحاً بدون رابط الحساب.');
+   input.reportValidity();
+   return;
+  }
+  input.setCustomValidity('');
   const note=document.querySelector('#orderNote').value.trim();
-  const msg='طلب خدمة Instagram من بروفايل ليث\\nاسم المستخدم: '+user+'\\nالسعر المعروض: 20,000 د.ع\\nالخدمة: '+(note||'غير محددة')+'\\nسأرفق إثبات التحويل في المحادثة.';
+  const msg=[
+   'طلب خدمة Instagram من بروفايل ليث',
+   'اسم المستخدم: @'+user,
+   'السعر المعروض: 20,000 د.ع',
+   'الخدمة: '+(note||'يرجى التواصل لتحديد الخدمة'),
+   'سأرفق إثبات التحويل في المحادثة.'
+  ].join('\\n');
   window.open('https://t.me/share/url?url='+encodeURIComponent('https://laythaziz.vercel.app')+'&text='+encodeURIComponent(msg),'_blank','noopener,noreferrer');
  });
 })();
@@ -117,4 +130,4 @@ if(particlesEnabled&&canvas&&ctx){
 /* Always start at the hero on a fresh load/refresh; in-page links still work normally. */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-window.addEventListener('pageshow', () => window.scrollTo({top:0,left:0,behavior:'instant'}));
+window.addEventListener('pageshow', () => window.scrollTo({top:0,left:0,behavior:'auto'}));
