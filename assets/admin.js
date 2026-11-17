@@ -26,7 +26,7 @@ function busy(button, value) { button.disabled = value; }
 
 async function sendCode() {
   const email = enteredEmail();
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return message('اكتب بريداً إلكترونياً صحيحاً أولاً.', true);
+  if (!email || !emailInput.validity.valid) return message('اكتب بريداً إلكترونياً صحيحاً أولاً.', true);
   if (email !== OWNER_EMAIL) return message('هذا البريد غير مخوّل للدخول إلى لوحة الإدارة.', true);
   busy(sendButton, true);
   message('جارٍ إرسال رمز التحقق إلى Gmail…');
