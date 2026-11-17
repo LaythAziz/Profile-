@@ -139,7 +139,7 @@ test('public services catalog renders newly created services instead of only the
 });
 
 test('admin dashboard supports live visitor search and service create/delete actions', () => {
-  const html = fs.readFileSync(path.join(root, 'admin-dashboard.html'), 'utf8');
+  const html = fs.readFileSync(path.join(root, 'control-center.html'), 'utf8');
   const js = fs.readFileSync(path.join(root, 'assets/admin-dashboard.js'), 'utf8');
   assert.match(html, /visitor-search/);
   assert.match(html, /visitor-table/);
