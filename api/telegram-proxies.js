@@ -31,7 +31,7 @@ function parseProxy(raw) {
     const secret = params.get("secret");
     if (
       !server || !port || !secret ||
-      !/^\\d+$/.test(port) || Number(port) < 1 || Number(port) > 65535 ||
+      !/^\d+$/.test(port) || Number(port) < 1 || Number(port) > 65535 ||
       !/^[a-zA-Z0-9_-]+$/.test(secret) ||
       server.length > 253
     ) return null;
@@ -56,7 +56,7 @@ async function loadSource(source, controller) {
     if (!response.ok) throw new Error("Source unavailable");
     const body = await response.text();
     const unique = new Map();
-    for (const line of body.split(/\\r?\\n/)) {
+    for (const line of body.split(/\r?\n/)) {
       const proxy = parseProxy(line);
       if (proxy && !unique.has(proxy.key)) unique.set(proxy.key, proxy);
       if (unique.size >= 8) break;
