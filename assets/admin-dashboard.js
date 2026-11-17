@@ -21,33 +21,24 @@ async function loadServices(){
  $('#order-service').innerHTML='<option value="">اختر الخدمة</option>'+services.filter(s=>s.is_active).map(s=>'<option value="'+s.id+'">'+esc(s.service_code)+' — '+esc(s.name_ar)+' ('+money(s.price,s.currency)+')</option>').join('');
 }
 async function loadAnalytics(){
- const [{data,error},{count:views},{count:beats},{count:ordersCount}]=await Promise.all([
-  supabase.from('analytics_events').select('event_type,page_path,created_at,visitor_session_id,ip_address,device_type,os_name,browser_name,visitor_name').order('created_at',{ascending:false}).limit(2000),
+ const [{data:visitorsData,error:visitorError},{data:eventsData,error:eventsError},{count:views},{count:beats},{count:ordersCount}]=await Promise.all([
+  supabase.rpc('get_profile_visitor_summary'),
+  supabase.from('analytics_events').select('event_type,page_path,created_at,ip_address,device_type,os_name,browser_name').order('created_at',{ascending:false}).limit(100),
   supabase.from('analytics_events').select('*',{count:'exact',head:true}).eq('event_type','page_view'),
   supabase.from('analytics_events').select('*',{count:'exact',head:true}).eq('event_type','heartbeat'),
   supabase.from('orders').select('*',{count:'exact',head:true})
  ]);
- if(error)throw error;
- const events=data||[],sessions=new Map();
- for(const event of events){
-  const key=event.visitor_session_id||event.ip_address||String(event.created_at);
-  let item=sessions.get(key);
-  if(!item){item={session:key,ip:event.ip_address||'غير متاح',device:event.device_type||'—',os:event.os_name||'—',browser:event.browser_name||'—',name:event.visitor_name||'—',views:0,beats:0,last:event.created_at,pages:new Set()};sessions.set(key,item);}
-  if(event.event_type==='page_view'){item.views++;if(event.page_path)item.pages.add(event.page_path);}
-  if(event.event_type==='heartbeat')item.beats++;
-  if(new Date(event.created_at)>new Date(item.last))item.last=event.created_at;
-  if(event.visitor_name)item.name=event.visitor_name;
- }
- const visitors=[...sessions.values()].sort((a,b)=>new Date(b.last)-new Date(a.last));
- const active=visitors.filter(v=>Date.now()-new Date(v.last).getTime()<30000).length;
- const ips=new Set(visitors.map(v=>v.ip).filter(ip=>ip!=='غير متاح'));
+ if(visitorError)throw visitorError;if(eventsError)throw eventsError;
+ const visitors=visitorsData||[],events=eventsData||[];
+ const active=visitors.filter(v=>Date.now()-new Date(v.last_seen).getTime()<30000).length;
+ const ips=new Set(visitors.map(v=>v.ip_address).filter(Boolean));
  $('#analytics-stats').innerHTML=stats([['الطلبات',ordersCount??0],['مشاهدات الصفحات',views??0],['الزوار النشطون الآن',active],['عناوين IP المسجلة',ips.size],['نبضات النشاط',beats??0]]);
  const query=($('#visitor-search')?.value||'').trim().toLocaleLowerCase();
- const filtered=visitors.filter(v=>[v.ip,v.name,v.device,v.os,v.browser,[...v.pages].join(' ')].join(' ').toLocaleLowerCase().includes(query));
- $('#visitor-table').innerHTML=filtered.length?'<table><thead><tr><th>الاسم</th><th>IP الكامل</th><th>الجهاز</th><th>النظام</th><th>المتصفح</th><th>مشاهدات</th><th>نبضات 10 ثوانٍ</th><th>آخر ظهور</th><th>الصفحات</th></tr></thead><tbody>'+filtered.map(v=>'<tr><td>'+esc(v.name)+'</td><td dir="ltr">'+esc(v.ip)+'</td><td>'+esc(v.device)+'</td><td>'+esc(v.os)+'</td><td>'+esc(v.browser)+'</td><td>'+v.views+'</td><td>'+v.beats+'</td><td>'+new Date(v.last).toLocaleString('ar-IQ')+'</td><td>'+esc([...v.pages].join('، ')||'—')+'</td></tr>').join('')+'</tbody></table>':empty('لا توجد زيارات مطابقة. سيظهر الزائر بعد موافقته على التتبع.');
- $('#analytics-table').innerHTML=events.length?'<table><thead><tr><th>الحدث</th><th>IP</th><th>الصفحة</th><th>الجهاز</th><th>التاريخ</th></tr></thead><tbody>'+events.slice(0,100).map(x=>'<tr><td>'+(x.event_type==='page_view'?'مشاهدة صفحة':'نبضة نشاط')+'</td><td dir="ltr">'+esc(x.ip_address||'—')+'</td><td>'+esc(x.page_path||'—')+'</td><td>'+esc([x.device_type,x.os_name,x.browser_name].filter(Boolean).join(' / ')||'—')+'</td><td>'+new Date(x.created_at).toLocaleString('ar-IQ')+'</td></tr>').join('')+'</tbody></table>':empty('لا توجد أحداث مسجلة بعد.');
+ const filtered=visitors.filter(v=>[v.ip_address,v.visitor_name,v.device_type,v.os_name,v.browser_name,(v.pages||[]).join(' ')].join(' ').toLocaleLowerCase().includes(query));
+ $('#visitor-table').innerHTML=filtered.length?'<table><thead><tr><th>الاسم</th><th>IP الكامل</th><th>الجهاز</th><th>النظام</th><th>المتصفح</th><th>مشاهدات</th><th>نبضات 10 ثوانٍ</th><th>آخر ظهور</th><th>الصفحات</th></tr></thead><tbody>'+filtered.map(v=>'<tr><td>'+esc(v.visitor_name||'—')+'</td><td dir="ltr">'+esc(v.ip_address||'غير متاح')+'</td><td>'+esc(v.device_type||'—')+'</td><td>'+esc(v.os_name||'—')+'</td><td>'+esc(v.browser_name||'—')+'</td><td>'+Number(v.page_views||0)+'</td><td>'+Number(v.heartbeats||0)+'</td><td>'+new Date(v.last_seen).toLocaleString('ar-IQ')+'</td><td>'+esc((v.pages||[]).join('، ')||'—')+'</td></tr>').join('')+'</tbody></table>':empty('لا توجد زيارات مطابقة. سيظهر الزائر بعد موافقته على التتبع.');
+ $('#analytics-table').innerHTML=events.length?'<table><thead><tr><th>الحدث</th><th>IP</th><th>الصفحة</th><th>الجهاز</th><th>التاريخ</th></tr></thead><tbody>'+events.map(x=>'<tr><td>'+(x.event_type==='page_view'?'مشاهدة صفحة':'نبضة نشاط')+'</td><td dir="ltr">'+esc(x.ip_address||'—')+'</td><td>'+esc(x.page_path||'—')+'</td><td>'+esc([x.device_type,x.os_name,x.browser_name].filter(Boolean).join(' / ')||'—')+'</td><td>'+new Date(x.created_at).toLocaleString('ar-IQ')+'</td></tr>').join('')+'</tbody></table>':empty('لا توجد أحداث مسجلة بعد.');
 }
-async function loadOverview(){const [c,o,s,a]=await Promise.all([supabase.from('customers').select('*',{count:'exact',head:true}),supabase.from('orders').select('*',{count:'exact',head:true}),supabase.from('services').select('*',{count:'exact',head:true}),supabase.from('analytics_events').select('*',{count:'exact',head:true})]);$('#overview-stats').innerHTML=stats([['العملاء',c.count??'—'],['الطلبات',o.count??'—'],['الخدمات',s.count??'—'],['الأحداث',a.count??'—']]);await loadOrders(true);}
+async function loadOverview(){const [c,o,s,a]=await Promise.all([supabase.from('customers').select('*',{count:'exact',head:true}),supabase.from('orders').select('*',{count:'exact',head:true}),supabase.from('services').select('*',{count:'exact',head:true}).eq('is_active',true),supabase.from('analytics_events').select('*',{count:'exact',head:true})]);$('#overview-stats').innerHTML=stats([['العملاء',c.count??'—'],['الطلبات',o.count??'—'],['الخدمات',s.count??'—'],['الأحداث',a.count??'—']]);await loadOrders(true);}
 async function refreshAll(){try{await Promise.all([loadOverview(),loadCustomers(),loadServices(),loadAnalytics()]);}catch(e){say(e.message||'تعذر تحميل البيانات',true);}}
 function view(n){document.querySelectorAll('.dashboard-view').forEach(v=>{v.hidden=v.id!=='view-'+n;});document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===n));$('#view-title').textContent=({overview:'نظرة عامة',orders:'إدارة الطلبات',customers:'العملاء',services:'الخدمات والأسعار',analytics:'الإحصائيات'})[n];}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.view)));document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.go)));
