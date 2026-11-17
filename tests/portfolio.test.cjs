@@ -121,14 +121,13 @@ test('admin email validation accepts normal Gmail addresses with whitespace trim
   assert.match(adminJs, /function enteredEmail\(\) \{ return emailInput\.value\.trim\(\)\.toLowerCase\(\); \}/);
 });
 
-test('visitor tracking requires consent and records a page view plus 10-second heartbeats', () => {
+test('visitor analytics records an optional name and sends 10-second heartbeats without IP collection', () => {
   const js = fs.readFileSync(path.join(root, 'assets/profile.js'), 'utf8');
-  assert.match(js, /profileAnalyticsConsent/);
-  assert.match(js, /eventType:\s*'page_view'/);
-  assert.match(js, /eventType:\s*'heartbeat'/);
+  assert.match(js, /profileAnalyticsName/);
+  assert.match(js, /visitorName:getName\(\)/);
   assert.match(js, /10000/);
-  assert.match(js, /consent:\s*true/);
-  assert.match(js, /visitorName/);
+  assert.match(js, /دون حفظ عنوان IP/);
+  assert.doesNotMatch(js, /profileAnalyticsConsent|data-consent-no|cf-connecting-ip|x-forwarded-for/);
 });
 
 test('public services catalog renders newly created services instead of only the original static 73', () => {
