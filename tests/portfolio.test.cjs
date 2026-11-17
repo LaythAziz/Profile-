@@ -133,5 +133,6 @@ test('admin login uses a versioned script URL to bypass stale cached OTP validat
 
 test('admin email validation accepts normal Gmail addresses with whitespace trimmed', () => {
   const adminJs = fs.readFileSync(path.join(root, 'assets/admin.js'), 'utf8');
-  assert.ok(adminJs.includes("!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)"));
+  assert.match(adminJs, /emailInput\.validity\.valid/);
+  assert.match(adminJs, /function enteredEmail\(\) \{ return emailInput\.value\.trim\(\)\.toLowerCase\(\); \}/);
 });
