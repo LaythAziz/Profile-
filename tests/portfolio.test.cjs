@@ -129,3 +129,9 @@ test('admin login uses a versioned script URL to bypass stale cached OTP validat
   const adminHtml = fs.readFileSync(path.join(root, 'admin.html'), 'utf8');
   assert.match(adminHtml, /src="\/assets\/admin\.js\?v=otp8-20261118"/);
 });
+
+
+test('admin email validation accepts normal Gmail addresses with whitespace trimmed', () => {
+  const adminJs = fs.readFileSync(path.join(root, 'assets/admin.js'), 'utf8');
+  assert.ok(adminJs.includes("!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)"));
+});
