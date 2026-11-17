@@ -255,67 +255,34 @@ if(!reduceMotion){resizeCanvas();draw();window.addEventListener('resize',resizeC
 })();
 
 
-/* Live Telegram MTProto proxy directory — refreshed public, upstream-verified feeds */
-(()=> {
+/* Cached proxy directory API — shared edge cache protects upstream sources */
+(()=>{
  const list=document.getElementById('proxy-live-list');
  const status=document.getElementById('proxy-live-status');
  if(!list||!status)return;
-
- const feeds=[
-  {name:'0xRadikal · Resilient',url:'https://raw.githubusercontent.com/0xRadikal/Free-Telegram-Proxy/main/resilient/tme.txt'},
-  {name:'iwizard7 · Stable',url:'https://raw.githubusercontent.com/iwizard7/MTProxy_list/data/stable.txt'}
- ];
- const escapeHtml=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
- const toTelegramLink=(raw)=>{
-  try{
-   const u=new URL(raw.trim());
-   if(u.protocol==='tg:' && u.hostname==='proxy'){
-    const p=new URLSearchParams(u.search);
-    const server=p.get('server'),port=p.get('port'),secret=p.get('secret');
-    if(!server||!port||!secret||!/^\d+$/.test(port)||+port<1||+port>65535||!/^[a-zA-Z0-9_-]+$/.test(secret))return null;
-    const out=new URL('https://t.me/proxy');
-    out.searchParams.set('server',server);out.searchParams.set('port',port);out.searchParams.set('secret',secret);
-    return {href:out.toString(),server,port,key:server+':'+port};
-   }
-   if((u.protocol==='https:'||u.protocol==='http:')&&['t.me','telegram.me','telegram.dog'].includes(u.hostname)&&u.pathname==='/proxy'){
-    const server=u.searchParams.get('server'),port=u.searchParams.get('port'),secret=u.searchParams.get('secret');
-    if(!server||!port||!secret||!/^\d+$/.test(port)||+port<1||+port>65535||!/^[a-zA-Z0-9_-]+$/.test(secret))return null;
-    const out=new URL('https://t.me/proxy');
-    out.searchParams.set('server',server);out.searchParams.set('port',port);out.searchParams.set('secret',secret);
-    return {href:out.toString(),server,port,key:server+':'+port};
-   }
-  }catch(e){}
-  return null;
- };
- let refreshing=false;
+ let loading=false;
+ const escapeHtml=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
  async function refreshProxyList(){
-  if(refreshing)return;
-  refreshing=true;
-  status.innerHTML='<p>جارٍ جلب أحدث البروكسيات من المصادر وفحص بياناتها…</p>';
+  if(loading)return;
+  loading=true;
+  status.innerHTML='<p>جارٍ تحديث قائمة البروكسيات…</p>';
   try{
-   let parsed=[],sourceName='';
-   for(const feed of feeds){
-    try{
-     const response=await fetch(feed.url+'?v='+Date.now(),{cache:'no-store'});
-     if(!response.ok)throw new Error('feed unavailable');
-     const body=await response.text();
-     const rows=body.split(/\r?\n/).map(toTelegramLink).filter(Boolean);
-     const unique=[...new Map(rows.map(x=>[x.key,x])).values()];
-     if(!unique.length)throw new Error('empty feed');
-     parsed=unique;sourceName=feed.name;break;
-    }catch(e){continue;}
-   }
-   if(!parsed.length)throw new Error('all proxy sources unavailable');
-   const shown=parsed.slice(0,8);
-   list.innerHTML=shown.map((proxy,index)=>'<article class="proxy-entry"><div><strong>'+escapeHtml(proxy.server)+'</strong><small>MTProto · Port '+escapeHtml(proxy.port)+' · '+(index===0?'اختيار مقترح':'متاح للإضافة')+'</small></div><a href="'+escapeHtml(proxy.href)+'" target="_blank" rel="noopener noreferrer">فتح Telegram وإضافة البروكسي</a></article>').join('');
-   const updated=new Date().toLocaleString('ar-IQ',{dateStyle:'medium',timeStyle:'short'});
-   status.innerHTML='<p>تم جلب '+shown.length+' بروكسيات من قائمة اجتازت فحوص MTProto لدى المصدر. المصدر: '+escapeHtml(sourceName)+' · آخر جلب: '+escapeHtml(updated)+'</p><button type="button" class="proxy-refresh-btn" id="proxy-refresh-now">تحديث البروكسيات</button>';
+   const response=await fetch('/api/telegram-proxies',{headers:{'Accept':'application/json'}});
+   if(!response.ok)throw new Error('proxy api unavailable');
+   const data=await response.json();
+   if(!Array.isArray(data.proxies)||!data.proxies.length)throw new Error('empty proxy list');
+   list.innerHTML=data.proxies.map((proxy,index)=>{
+    const href=String(proxy.href||'');
+    if(!href.startsWith('https://t.me/proxy?'))return '';
+    return '<article class="proxy-entry"><div><strong>'+escapeHtml(proxy.server||'Telegram MTProto')+'</strong><small>MTProto · Port '+escapeHtml(proxy.port||'—')+' · '+(index===0?'اختيار مقترح':'متاح للإضافة')+'</small></div><a href="'+escapeHtml(href)+'" target="_blank" rel="noopener noreferrer">فتح Telegram وإضافة البروكسي</a></article>';
+   }).join('');
+   if(!list.children.length)throw new Error('no valid links');
+   const updated=data.updatedAt?new Date(data.updatedAt).toLocaleString('ar-IQ',{dateStyle:'medium',timeStyle:'short'}):'الآن';
+   status.innerHTML='<p>تم تحميل '+list.children.length+' بروكسيات · المصدر: '+escapeHtml(data.source||'مصدر عام')+' · آخر تحديث: '+escapeHtml(updated)+'</p><button type="button" class="proxy-refresh-btn" id="proxy-refresh-now">تحديث البروكسيات</button>';
   }catch(error){
-   status.innerHTML='<p>تعذر جلب قائمة البروكسيات الآن. حاول التحديث بعد قليل.</p><button type="button" class="proxy-refresh-btn" id="proxy-refresh-now">إعادة المحاولة</button>';
+   status.innerHTML='<p>قائمة البروكسيات غير متاحة مؤقتاً. حاول مرة أخرى بعد قليل.</p><button type="button" class="proxy-refresh-btn" id="proxy-refresh-now">إعادة المحاولة</button>';
    list.innerHTML='';
-  }finally{
-   refreshing=false;
-  }
+  }finally{loading=false;}
  }
  status.addEventListener('click',event=>{if(event.target&&event.target.id==='proxy-refresh-now')refreshProxyList();});
  refreshProxyList();
