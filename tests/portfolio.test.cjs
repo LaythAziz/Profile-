@@ -85,10 +85,10 @@ test('all remembered public social destinations are present and open safely', ()
   for (const url of [
     'https://www.tiktok.com/@i713l',
     'https://youtube.com/@lynz317',
-    'https://www.facebook.com/share/1KYqkEC2yo/',
-    'https://github.com/LaythAziz'
+    'https://www.facebook.com/share/19qB1j43an/?mibextid=wwXIfr',
   ]) assert.ok(html.includes(url), 'Missing social URL: ' + url);
   assert.doesNotMatch(html, /target="_blank"(?![^>]*rel="[^"]*noopener)/);
+  assert.doesNotMatch(html, /github\.com\/LaythAziz|<strong>GitHub<\/strong>/);
 });
 
 test('Telegram proxy endpoint returns a non-cacheable error when all sources fail', async () => {
