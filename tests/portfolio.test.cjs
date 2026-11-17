@@ -73,7 +73,7 @@ test('SEO discovery files and Vercel configuration are valid', () => {
   const vercel = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
   assert.ok(vercel.headers.some(rule => rule.source === '/assets/(.*)'));
   assert.match(fs.readFileSync(path.join(root, 'robots.txt'), 'utf8'), /Sitemap:/);
-  assert.match(fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8'), /<loc>https:\/\/laythaziz\.vercel\.app<\//);
+  assert.match(fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8'), /<loc>https:\/\/laythaziz\.vercel\.app\//);
   assert.ok(fs.existsSync(path.join(root, 'assets/favicon.svg')));
 });
 
