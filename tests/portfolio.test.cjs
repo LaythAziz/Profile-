@@ -1,0 +1,70 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = path.join(__dirname, '..');
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+
+test('portfolio keeps all 73 Instagram service entries', () => {
+  assert.equal((html.match(/class="offer-no"/g) || []).length, 73);
+});
+
+test('checkout and payment details stay hidden until the user requests a service', () => {
+  assert.match(html, /id="service-order"[^>]*hidden/);
+  assert.match(html, /data-open-order/);
+});
+
+test('page uses cacheable external CSS and deferred JavaScript assets', () => {
+  assert.match(html, /href="\/assets\/profile\.css"/);
+  assert.match(html, /src="\/assets\/profile\.js" defer/);
+  assert.ok(fs.existsSync(path.join(root, 'assets/profile.css')));
+  assert.ok(fs.existsSync(path.join(root, 'assets/profile.js')));
+});
+
+test('page includes accessible skip navigation and search metadata', () => {
+  assert.match(html, /class="skip-link"[^>]*href="#main-content"/);
+  assert.match(html, /<main[^>]*id="main-content"/);
+  assert.match(html, /rel="canonical"/);
+  assert.match(html, /application\/ld\+json/);
+});
+
+test('external browser code parses without syntax errors', () => {
+  const js = fs.readFileSync(path.join(root, 'assets/profile.js'), 'utf8');
+  assert.doesNotThrow(() => new Function(js));
+});
+
+test('Telegram proxy endpoint only serves GET requests', async () => {
+  const handler = require('../api/telegram-proxies');
+  const headers = {};
+  let status;
+  const response = { setHeader: (key, value) => { headers[key] = value; }, status(code) { status = code; return this; }, json(body) { this.body = body; return this; } };
+  await handler({ method: 'POST' }, response);
+  assert.equal(status, 405);
+  assert.equal(headers.Allow, 'GET');
+});
+
+test('Telegram proxy endpoint returns validated Telegram deep links', async () => {
+  const handler = require('../api/telegram-proxies');
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({
+    ok: true,
+    text: async () => [
+      'not-a-proxy',
+      'tg://proxy?server=proxy.example.com&port=443&secret=0123456789abcdef',
+      'tg://proxy?server=bad.example.com&port=99999&secret=0123456789abcdef'
+    ].join('\\n')
+  });
+  const headers = {};
+  let status;
+  const response = { setHeader: (key, value) => { headers[key] = value; }, status(code) { status = code; return this; }, json(body) { this.body = body; return this; } };
+  try {
+    await handler({ method: 'GET' }, response);
+    assert.equal(status, 200);
+    assert.equal(response.body.proxies.length, 1);
+    assert.match(response.body.proxies[0].href, /^https:\/\/t\.me\/proxy\?/);
+    assert.match(headers['Vercel-CDN-Cache-Control'], /s-maxage=600/);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
