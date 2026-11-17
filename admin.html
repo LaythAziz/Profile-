@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#07090b">
+<title>إدارة Profile | ليث عزيز</title>
+<link rel="stylesheet" href="/assets/admin.css">
+</head>
+<body>
+<main class="admin-shell">
+  <a class="back-link" href="/">العودة إلى الموقع</a>
+  <section class="admin-card" aria-labelledby="admin-title">
+    <div class="brand-mark" aria-hidden="true">LA</div>
+    <p class="eyebrow">PROFILE CONTROL CENTER</p>
+    <h1 id="admin-title">لوحة الإدارة</h1>
+    <p class="intro">دخول آمن مخصص لمالك الموقع. سنرسل رمز تحقق مؤقت إلى بريدك الإلكتروني.</p>
+    <form id="request-form">
+      <label for="email">البريد الإلكتروني</label>
+      <input id="email" type="email" value="laythaziz.3@gmail.com" autocomplete="username" readonly required>
+      <button type="submit" id="send-code">إرسال رمز التحقق</button>
+    </form>
+    <form id="verify-form" hidden>
+      <label for="otp">رمز التحقق المرسل إلى Gmail</label>
+      <input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="••••••" required>
+      <button type="submit" id="verify-code">تحقق وافتح اللوحة</button>
+      <button type="button" class="secondary" id="resend-code">إعادة إرسال الرمز</button>
+    </form>
+    <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+    <p class="security-note">لا تشارك رمز التحقق مع أي شخص. صلاحية المالك مرتبطة بالبريد الموثّق في قاعدة البيانات، وليس بما يظهر في هذه الصفحة.</p>
+  </section>
+</main>
+<script type="module" src="/assets/admin.js"></script>
+</body>
+</html>
