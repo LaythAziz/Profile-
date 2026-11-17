@@ -143,9 +143,9 @@ test('admin dashboard supports live visitor search and service create/delete act
   const js = fs.readFileSync(path.join(root, 'assets/admin-dashboard.js'), 'utf8');
   assert.match(html, /visitor-search/);
   assert.match(html, /visitor-table/);
-  assert.match(js, /visitor_session_id/);
+  assert.match(js, /get_profile_visitor_summary/);
   assert.match(js, /ip_address/);
-  assert.match(js, /data-add-service/);
+  assert.match(html, /data-add-service/);
   assert.match(js, /data-delete-service/);
   assert.match(js, /10000/);
 });
