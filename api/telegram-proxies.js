@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
     try {
       const upstream = await fetch(source.url, {
         headers: { "User-Agent": "LaythAziz-Profile-ProxyDirectory/1.0" },
-        signal: AbortSignal.timeout(7000)
+        signal: AbortSignal.timeout(3500)
       });
       if (!upstream.ok) continue;
       const body = await upstream.text();
@@ -82,5 +82,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Vercel-CDN-Cache-Control", "no-store");
   return res.status(503).json({ error: "Proxy list temporarily unavailable" });
 };
