@@ -90,7 +90,7 @@ if(particlesEnabled&&canvas&&ctx){
    'السعر المعروض: 20,000 د.ع',
    'الخدمة: '+(note||'يرجى التواصل لتحديد الخدمة'),
    'سأرفق إثبات التحويل في المحادثة.'
-  ].join('\\n');
+  ].join('\n');
   window.open('https://t.me/share/url?url='+encodeURIComponent('https://laythaziz.vercel.app')+'&text='+encodeURIComponent(msg),'_blank','noopener,noreferrer');
  });
 })();
