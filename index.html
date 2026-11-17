@@ -46,7 +46,7 @@ section.content-section{padding:105px 0;border-top:1px solid var(--line);positio
 .service-actions{display:flex;flex-wrap:wrap;gap:10px}
 .offers-panel{margin:20px 0}
 .offer-count{font:700 10px var(--mono);color:var(--lime);border:1px solid #c5ff4835;border-radius:99px;padding:8px 12px}
-.offer-search-label{display:block;margin:20px 0 7px;color:var(--muted);font-size:12px}.offer-search{width:100%;border:1px solid #ffffff20;background:#070b0d;color:var(--text);border-radius:11px;padding:13px 15px;font:inherit;font-size:13px;outline:none}.offer-search:focus{border-color:#51f5dc80;box-shadow:0 0 0 3px #51f5dc0b}.offer-group[hidden],.offer-item[hidden]{display:none!important}#service-order[hidden]{display:none!important}.offer-item{cursor:pointer;transition:color .2s}.offer-item:hover{color:var(--lime)}.order-panel{scroll-margin-top:100px}.offer-list{display:grid;grid-template-columns:1fr;gap:10px;margin-top:22px}
+.offer-search-label{display:block;margin:20px 0 7px;color:var(--muted);font-size:12px}.offer-search{width:100%;border:1px solid #ffffff20;background:#070b0d;color:var(--text);border-radius:11px;padding:13px 15px;font:inherit;font-size:13px;outline:none}.offer-search:focus{border-color:#51f5dc80;box-shadow:0 0 0 3px #51f5dc0b}.offer-group[hidden],.offer-item[hidden]{display:none!important}#service-order[hidden]{display:none!important}.offer-item{cursor:pointer;transition:color .2s}.offer-item:hover{color:var(--lime)}.offer-item:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:6px}.order-panel{scroll-margin-top:100px}.offer-list{display:grid;grid-template-columns:1fr;gap:10px;margin-top:22px}
 .offer-group{border:1px solid #ffffff12;border-radius:14px;background:#070b0d55;overflow:hidden;transition:border-color .25s,background .25s}
 .offer-group[open]{border-color:#51f5dc38;background:#0b1112}
 .offer-group summary{list-style:none;display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:14px;padding:17px 19px;cursor:pointer;user-select:none}
@@ -222,6 +222,7 @@ if(!reduceMotion){resizeCanvas();draw();window.addEventListener('resize',resizeC
  const openOrder=()=>{
   if(!order)return;
   order.hidden=false;
+  order.classList.add('visible');
   order.scrollIntoView({behavior:'smooth',block:'start'});
  };
  document.querySelectorAll('[data-open-order]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();openOrder();}));
