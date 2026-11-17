@@ -39,7 +39,7 @@ async function sendCode() {
     requestForm.hidden = true;
     verifyForm.hidden = false;
     otpInput.focus();
-    message('تم إرسال رمز التحقق. افتح Gmail وانسخ الرمز المكوّن من 6 أرقام، ثم أدخله هنا.');
+    message('تم إرسال رمز التحقق. افتح Gmail وانسخ الرمز كاملاً (من 6 إلى 10 أرقام)، ثم أدخله هنا.');
   } catch (error) {
     const detail = String(error.message || '');
     if (/rate limit|too many requests|over_email_send_rate_limit/i.test(detail)) {
@@ -56,7 +56,7 @@ resendButton.addEventListener('click', sendCode);
 verifyForm.addEventListener('submit', async event => {
   event.preventDefault();
   const token = otpInput.value.trim();
-  if (!/^\d{6}$/.test(token)) return message('أدخل رمز التحقق المكوّن من 6 أرقام.', true);
+  if (!/^\d{6,10}$/.test(token)) return message('أدخل رمز التحقق كاملاً (من 6 إلى 10 أرقام).', true);
   busy(verifyButton, true);
   message('جارٍ التحقق من الرمز والصلاحيات…');
   try {
