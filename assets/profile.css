@@ -148,3 +148,12 @@ section.content-section{padding:clamp(82px,9vw,124px) 0;border-top-color:#d8fff0
 .proxy-entry a:focus-visible,.proxy-refresh-btn:focus-visible{outline-offset:3px}
 @media(max-width:650px){.skip-link{right:8px}.social-grid{grid-template-columns:1fr}.navlinks{scroll-snap-type:x proximity}.navlinks a{scroll-snap-align:start;white-space:nowrap}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.reveal{opacity:1!important;transform:none!important}}
+
+/* Consent notice for visitor analytics */
+.privacy-consent{position:fixed;z-index:9999;inset:auto 18px 18px;max-width:760px;margin-inline:auto;padding:20px;display:flex;align-items:flex-end;gap:20px;border:1px solid #51f5dc55;border-radius:18px;background:#080e12f5;box-shadow:0 20px 70px #000b;backdrop-filter:blur(18px);color:#edf5f1}
+.privacy-consent[hidden],.privacy-settings[hidden]{display:none!important}
+.privacy-copy{min-width:0;flex:1}.privacy-copy strong{color:var(--lime);font-size:15px}.privacy-copy p{margin:8px 0 12px;color:#bdc9c3;font-size:12px;line-height:1.9}
+.privacy-copy label{display:flex;align-items:center;gap:10px;color:#aebdb5;font-size:11px}.privacy-name{width:min(220px,55%);padding:8px 10px;border:1px solid #ffffff25;border-radius:9px;background:#05090b;color:#fff;font:inherit}
+.privacy-actions{display:flex;gap:8px;flex-shrink:0}.privacy-actions button,.privacy-settings{border:1px solid #51f5dc66;border-radius:10px;padding:10px 14px;background:#c5ff48;color:#111;font:600 12px inherit;cursor:pointer}.privacy-actions button[data-consent-no]{background:transparent;color:#dce7e1;border-color:#ffffff2a}
+.privacy-settings{position:fixed;z-index:9998;bottom:16px;left:16px;background:#0b1417;color:#dce7e1;border-color:#51f5dc55;box-shadow:0 8px 30px #0008}
+@media(max-width:650px){.privacy-consent{inset:auto 10px 10px;display:grid;gap:12px;padding:15px}.privacy-actions{display:grid;grid-template-columns:1fr 1fr}.privacy-copy label{flex-wrap:wrap}.privacy-name{width:100%}.privacy-settings{bottom:10px;left:10px}}
