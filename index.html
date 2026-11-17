@@ -218,10 +218,10 @@ document.querySelector('#serviceForm')?.addEventListener('submit',e=>{e.preventD
 (()=>{const list=document.getElementById('proxy-live-list'),status=document.getElementById('proxy-live-status');if(!list||!status)return;
 const feed='https://raw.githubusercontent.com/iwizard7/MTProxy_list/data/working.txt';
 const escapeHtml=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-async function refreshProxyList(){try{const response=await fetch(feed+'?v='+Math.floor(Date.now()/600000),{cache:'no-store'});if(!response.ok)throw new Error('feed unavailable');const body=await response.text();const links=[...new Set(body.split(/\r?\n/).map(x=>x.trim()).filter(x=>/^tg:\/\/proxy\?/.test(x)))].slice(0,12);if(!links.length)throw new Error('no verified links');
-list.innerHTML=links.map((link,index)=>{const u=new URL(link),server=u.searchParams.get('server')||'Telegram MTProto',port=u.searchParams.get('port')||'—';return '<article class="proxy-entry"><div><strong>'+escapeHtml(server)+'</strong><small>MTProto · Port '+escapeHtml(port)+' · ضمن القائمة المجتازة للفحص</small></div><a href="'+escapeHtml(link)+'" rel="noopener">إضافة إلى Telegram</a></article>'}).join('');
+async function refreshProxyList(){try{const response=await fetch(feed+'?v='+Math.floor(Date.now()/600000),{cache:'no-store'});if(!response.ok)throw new Error('feed unavailable');const body=await response.text();const links=[...new Set(body.split(/\r?\n/).map(x=>x.trim()).filter(x=>/^tg:\/\/proxy\?/.test(x)))].slice(0,6);if(!links.length)throw new Error('no verified links');
+list.innerHTML=links.map((link,index)=>{const u=new URL(link),server=u.searchParams.get('server')||'Telegram MTProto',port=u.searchParams.get('port')||'—';return '<article class="proxy-entry"><div><strong>'+escapeHtml(server)+'</strong><small>MTProto · Port '+escapeHtml(port)+' · ضمن القائمة المجتازة للفحص</small></div><a href="'+escapeHtml(link)+'" rel="noopener">فتح Telegram وإضافة البروكسي</a></article>'}).join('');
 status.innerHTML='<p>تم تحميل '+links.length+' بروكسيات من قائمة اجتازت فحص MTProto لدى المصدر.</p><span class="proxy-live-pill"><i></i> تم التحديث</span>';
-}catch(error){status.innerHTML='<p>تعذر تحميل القائمة حالياً. جرّب فتح المصدر مباشرة.</p><a href="https://iwizard7.github.io/MTProxy_list/working.txt" target="_blank" rel="noopener">فتح قائمة البروكسيات</a>';}}
+}catch(error){status.innerHTML='<p>تعذر تحميل خوادم الاتصال حالياً. اضغط تحديث الصفحة أو حاول بعد قليل.</p>';}}
 refreshProxyList();setInterval(refreshProxyList,10*60*1000);
 })();
 </script>
