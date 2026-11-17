@@ -55,7 +55,7 @@ test('Telegram proxy endpoint falls back to a healthy source and returns validat
         'not-a-proxy',
         'tg://proxy?server=proxy.example.com&port=443&secret=0123456789abcdef',
         'tg://proxy?server=bad.example.com&port=99999&secret=0123456789abcdef'
-      ].join('\\n')
+      ].join('\n')
     };
   };
   const headers = {};
