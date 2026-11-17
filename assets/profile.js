@@ -60,30 +60,45 @@ if(particlesEnabled&&canvas&&ctx){
  const formatPrice=(value,currency='IQD')=>Number(value||0)>0?Number(value).toLocaleString('en-US')+' '+(currency==='IQD'?'د.ع':currency):'السعر عند الطلب';
  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  async function loadCatalog(){
-  document.querySelectorAll('.offer-item').forEach(item=>{item.setAttribute('tabindex','0');item.setAttribute('role','button');});
   try{
    const response=await fetch('https://nbqvdvtaqvfwkcvmhled.supabase.co/rest/v1/services?select=service_code,name_ar,description_ar,price,currency,is_active&order=sort_order.asc',{
     headers:{apikey:'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn',Authorization:'Bearer sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'}
    });
    if(!response.ok)throw new Error('catalog');
    const services=await response.json();
-   const byCode=new Map(services.map(s=>[s.service_code,s]));
-   document.querySelectorAll('.offer-item').forEach(item=>{
-    const code=item.querySelector('.offer-no')?.textContent.trim().padStart(2,'0');
-    const service=byCode.get(code);
-    if(!service){item.hidden=true;return;}
-    item.dataset.serviceCode=service.service_code;
-    item.dataset.active=String(service.is_active);
-    item.hidden=!service.is_active;
+   const existing=new Map([...document.querySelectorAll('.offer-item')].map(item=>[item.querySelector('.offer-no')?.textContent.trim(),item]));
+   let addedGroup=null,addedItems=null;
+   for(const service of services){
+    const code=String(service.service_code||'').trim();
+    if(!code)continue;
+    let item=existing.get(code);
+    if(!item){
+     if(!addedGroup){
+      addedGroup=document.createElement('details');addedGroup.className='offer-group';addedGroup.open=true;
+      const summary=document.createElement('summary');
+      summary.innerHTML='<span class="group-index">NEW</span><span class="group-title">خدمات مضافة حديثاً</span><span class="group-count">0 خدمات</span>';
+      addedItems=document.createElement('div');addedItems.className='offer-group-items';
+      addedGroup.append(summary,addedItems);list?.append(addedGroup);
+     }
+     item=document.createElement('div');item.className='offer-item';item.innerHTML='<span class="offer-no"></span><span></span>';
+     addedItems.append(item);
+    }
+    item.dataset.serviceCode=code;item.dataset.active=String(service.is_active);item.hidden=!service.is_active;
+    const no=item.querySelector('.offer-no');if(no)no.textContent=code.padStart(2,'0');
     const label=item.querySelectorAll('span')[1];
     if(label)label.textContent=service.name_ar+(service.description_ar?' — '+service.description_ar:'')+' · '+formatPrice(service.price,service.currency);
-   });
+    item.setAttribute('tabindex','0');item.setAttribute('role','button');
+   }
    groups.forEach(group=>{
     const items=[...group.querySelectorAll('.offer-item')].filter(item=>!item.hidden);
-    const count=group.querySelector('.group-count');
-    if(count)count.textContent=items.length+' خدمات';
+    const count=group.querySelector('.group-count');if(count)count.textContent=items.length+' خدمات';
     group.hidden=items.length===0;
    });
+   if(addedGroup){const count=addedGroup.querySelector('.group-count');count.textContent=[...addedItems.querySelectorAll('.offer-item')].filter(x=>!x.hidden).length+' خدمات';}
+   const activeCount=services.filter(s=>s.is_active).length;
+   document.querySelectorAll('.offer-count').forEach(el=>el.textContent=activeCount+' SERVICE');
+   const heading=document.querySelector('#instagram-offers h3 .green');if(heading)heading.textContent='01—'+String(activeCount).padStart(2,'0');
+   const cardHeading=document.querySelector('.service-card h3 .green');if(cardHeading)cardHeading.textContent='— '+activeCount+' خدمة';
   }catch{/* Keep the verified static catalog visible if the API is temporarily unavailable. */}
  }
  document.querySelectorAll('[data-open-order]').forEach(link=>link.addEventListener('click',event=>{
@@ -181,3 +196,31 @@ window.addEventListener('pageshow', () => window.scrollTo({top:0,left:0,behavior
 
 // Privacy-friendly page-view counter: stores only the page path, not personal identifiers.
 (()=>{if(document.visibilityState==='prerender')return;fetch('https://nbqvdvtaqvfwkcvmhled.supabase.co/functions/v1/track-profile-view',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'},body:JSON.stringify({path:location.pathname}),keepalive:true}).catch(()=>{});})();
+
+
+// Privacy-first visitor analytics: no tracking until the visitor explicitly opts in.
+(()=> {
+ const KEY='profileAnalyticsConsent',NAME_KEY='profileAnalyticsName',SESSION_KEY='profileAnalyticsSession';
+ const endpoint='https://nbqvdvtaqvfwkcvmhled.supabase.co/functions/v1/track-profile-view';
+ const readName=()=>{try{return sessionStorage.getItem(NAME_KEY)||'';}catch{return '';}};
+ const getSession=()=>{try{let id=sessionStorage.getItem(SESSION_KEY);if(!id){id=crypto.randomUUID();sessionStorage.setItem(SESSION_KEY,id);}return id;}catch{return crypto.randomUUID();}};
+ let timer=null;
+ const send=async eventType=>{
+  if(localStorage.getItem(KEY)!=='accepted')return;
+  try{await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'},keepalive:eventType==='page_view',body:JSON.stringify({consent:true,eventType,path:location.pathname,sessionId:getSession(),visitorName:readName()})});}catch{/* Analytics must never block the portfolio. */}
+ };
+ const start=()=>{if(timer)return;send('page_view');timer=setInterval(()=>send('heartbeat'),10000);};
+ const stop=()=>{if(timer)clearInterval(timer);timer=null;};
+ const banner=document.createElement('aside');banner.className='privacy-consent';banner.setAttribute('aria-label','إعدادات الخصوصية');banner.hidden=true;
+ banner.innerHTML='<div class="privacy-copy"><strong>خصوصيتك مهمة</strong><p>بموافقتك، نجمع عنوان IP الكامل ونوع الجهاز والمتصفح والصفحات التي تزورها، ونسجل نبضة نشاط كل 10 ثوانٍ طوال بقاءك في الموقع. يحتفظ مالك الموقع بهذه البيانات دون حذف تلقائي. لا نستنتج اسمك الحقيقي؛ يمكنك إدخال اسم اختياري لربط زيارتك به.</p><label>اسمك (اختياري)<input class="privacy-name" maxlength="80" autocomplete="name" placeholder="اكتب اسمك إذا رغبت"></label></div><div class="privacy-actions"><button type="button" data-consent-yes>موافق وأتابع</button><button type="button" data-consent-no>رفض</button></div>';
+ document.body.append(banner);
+ const settings=document.createElement('button');settings.type='button';settings.className='privacy-settings';settings.textContent='إعدادات الخصوصية';settings.hidden=true;document.body.append(settings);
+ const show=()=>{banner.hidden=false;settings.hidden=true;};
+ const accepted=localStorage.getItem(KEY);
+ if(accepted==='accepted'){start();settings.hidden=false;}else if(accepted!=='rejected')show();else settings.hidden=false;
+ banner.querySelector('[data-consent-yes]').addEventListener('click',()=>{const name=banner.querySelector('.privacy-name').value.trim().slice(0,80);try{localStorage.setItem(KEY,'accepted');sessionStorage.setItem(NAME_KEY,name);}catch{}banner.hidden=true;settings.hidden=false;start();});
+ banner.querySelector('[data-consent-no]').addEventListener('click',()=>{try{localStorage.setItem(KEY,'rejected');}catch{}banner.hidden=true;settings.hidden=false;stop();});
+ settings.addEventListener('click',show);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else if(localStorage.getItem(KEY)==='accepted')start();});
+ window.addEventListener('pagehide',stop);
+})();
