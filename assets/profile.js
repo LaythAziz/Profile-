@@ -41,60 +41,104 @@ if(particlesEnabled&&canvas&&ctx){
  document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else if(heroVisible)draw();});
 }
 
-// Services: compact search and on-demand order flow; no credentials are collected.
+// Services catalog and order submission
 (()=>{
  const order=document.getElementById('service-order');
  const search=document.getElementById('service-search');
  const groups=[...document.querySelectorAll('.offer-group')];
+ const list=document.querySelector('.offer-list');
+ const form=document.getElementById('serviceForm');
+ const feedback=document.getElementById('orderFeedback');
+ const payment=document.getElementById('paymentAfterOrder');
+ const hiddenCode=document.getElementById('serviceCode');
  const openOrder=()=>{
   if(!order)return;
-  order.hidden=false;
-  order.classList.add('visible');
-  order.scrollIntoView({behavior:'smooth',block:'start'});
+  order.hidden=false;order.classList.add('visible');
+  order.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'start'});
  };
- document.querySelectorAll('[data-open-order]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();const field=document.getElementById('orderNote');if(field&&!field.value.trim())field.value='طلب عام من باقة Instagram — أرجو التواصل لتحديد الخدمة';openOrder();}));
- document.querySelectorAll('.offer-item').forEach(item=>{
-  item.setAttribute('tabindex','0');item.setAttribute('role','button');
-  item.addEventListener('click',()=>{const label=item.innerText.replace(/^\s*\d+\s*/, '').trim();const field=document.getElementById('orderNote');if(field)field.value=label;openOrder();});
-  item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();item.click();}});
+ const say=(text,error=false)=>{if(feedback){feedback.textContent=text;feedback.dataset.error=error?'true':'false';}};
+ const formatPrice=(value,currency='IQD')=>Number(value||0)>0?Number(value).toLocaleString('en-US')+' '+(currency==='IQD'?'د.ع':currency):'السعر عند الطلب';
+ const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ async function loadCatalog(){
+  try{
+   const response=await fetch('https://nbqvdvtaqvfwkcvmhled.supabase.co/rest/v1/services?select=service_code,name_ar,description_ar,price,currency,is_active&order=sort_order.asc',{
+    headers:{apikey:'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn',Authorization:'Bearer sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'}
+   });
+   if(!response.ok)throw new Error('catalog');
+   const services=await response.json();
+   const byCode=new Map(services.map(s=>[s.service_code,s]));
+   document.querySelectorAll('.offer-item').forEach(item=>{
+    const code=item.querySelector('.offer-no')?.textContent.trim().padStart(2,'0');
+    const service=byCode.get(code);
+    if(!service){item.hidden=true;return;}
+    item.dataset.serviceCode=service.service_code;
+    item.hidden=!service.is_active;
+    const label=item.querySelectorAll('span')[1];
+    if(label)label.textContent=service.name_ar+(service.description_ar?' — '+service.description_ar:'')+' · '+formatPrice(service.price,service.currency);
+   });
+   groups.forEach(group=>{
+    const items=[...group.querySelectorAll('.offer-item')].filter(item=>!item.hidden);
+    const count=group.querySelector('.group-count');
+    if(count)count.textContent=items.length+' خدمات';
+    group.hidden=items.length===0;
+   });
+  }catch{/* Keep the verified static catalog visible if the API is temporarily unavailable. */}
+ }
+ document.querySelectorAll('[data-open-order]').forEach(link=>link.addEventListener('click',event=>{
+  event.preventDefault();hiddenCode.value='';say('اختر خدمة محددة من القائمة حتى نسجل الطلب ونحسب سعره.');
+  const field=document.getElementById('orderNote');if(field)field.value='';
+  if(payment)payment.hidden=true;openOrder();
+ }));
+ list?.addEventListener('click',event=>{
+  const item=event.target.closest('.offer-item');if(!item||item.hidden)return;
+  const code=item.dataset.serviceCode||item.querySelector('.offer-no')?.textContent.trim().padStart(2,'0');
+  hiddenCode.value=code||'';
+  const label=item.querySelectorAll('span')[1]?.textContent.trim()||item.textContent.trim();
+  const field=document.getElementById('orderNote');if(field)field.value=label;
+  say('تم اختيار الخدمة رقم '+code+'. أدخل اسم المستخدم لتأكيد الطلب.');
+  if(payment)payment.hidden=true;openOrder();
  });
+ list?.addEventListener('keydown',event=>{const item=event.target.closest('.offer-item');if(item&&(event.key==='Enter'||event.key===' ')){event.preventDefault();item.click();}});
  search?.addEventListener('input',()=>{
   const query=search.value.trim().toLocaleLowerCase();
   groups.forEach(group=>{
-   const items=[...group.querySelectorAll('.offer-item')];
-   let matches=0;
+   const items=[...group.querySelectorAll('.offer-item')];let matches=0;
    items.forEach(item=>{const match=!query||item.textContent.toLocaleLowerCase().includes(query);item.hidden=!match;if(match)matches++;});
-   group.hidden=matches===0;
-   if(query&&matches)group.open=true;
-   if(!query)group.open=false;
+   group.hidden=matches===0;if(query&&matches)group.open=true;if(!query)group.open=false;
   });
  });
  document.querySelector('[data-copy-payment]')?.addEventListener('click',async()=>{
   try{await navigator.clipboard.writeText('7168843873');const b=document.querySelector('[data-copy-payment]');b.textContent='تم النسخ ✓';setTimeout(()=>b.textContent='نسخ الرقم',1600);}
-  catch{alert('انسخ الرقم يدوياً: 7168843873');}
+  catch{say('انسخ الرقم يدوياً: 7168843873',true);}
  });
- document.querySelector('#serviceForm')?.addEventListener('submit',event=>{
+ form?.addEventListener('submit',async event=>{
   event.preventDefault();
-  const input=document.querySelector('#igUser');
-  const user=input.value.trim().replace(/^@/,'');
-  if(!/^[a-zA-Z0-9._]{1,30}$/.test(user)){
-   input.setCustomValidity('اكتب اسم مستخدم Instagram صحيحاً بدون رابط الحساب.');
-   input.reportValidity();
-   return;
-  }
+  const input=document.getElementById('igUser'),user=input.value.trim().replace(/^@/,'');
+  const code=hiddenCode.value.trim(),note=document.getElementById('orderNote').value.trim();
+  if(!/^[A-Za-z0-9._]{1,30}$/.test(user)){input.setCustomValidity('اكتب اسم مستخدم Instagram صحيحاً.');input.reportValidity();return;}
   input.setCustomValidity('');
-  const note=document.querySelector('#orderNote').value.trim();
-  const msg=[
-   'طلب خدمة Instagram من بروفايل ليث',
-   'اسم المستخدم: @'+user,
-   'السعر المعروض: 20,000 د.ع',
-   'الخدمة: '+(note||'يرجى التواصل لتحديد الخدمة'),
-   'سأرفق إثبات التحويل في المحادثة.'
-  ].join('\n');
-  window.open('https://t.me/share/url?url='+encodeURIComponent('https://laythaziz.vercel.app')+'&text='+encodeURIComponent(msg),'_blank','noopener,noreferrer');
+  if(!/^\d{2}$/.test(code)){say('اختَر خدمة محددة من قائمة الخدمات أولاً.',true);return;}
+  const button=document.getElementById('submitServiceOrder');button.disabled=true;button.textContent='جارٍ تسجيل الطلب…';say('يتم حفظ طلبك بشكل آمن…');
+  try{
+   const response=await fetch('https://nbqvdvtaqvfwkcvmhled.supabase.co/functions/v1/create-profile-order',{
+    method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'},
+    body:JSON.stringify({username:user,serviceCode:code,note})
+   });
+   const result=await response.json();
+   if(!response.ok)throw new Error(result.error||'تعذر إنشاء الطلب.');
+   if(payment)payment.hidden=false;
+   const confirm=document.getElementById('orderConfirmation');
+   if(confirm)confirm.textContent='تم تسجيل طلبك '+result.orderCode+' — '+result.service+' — '+Number(result.price).toLocaleString('en-US')+' د.ع. حوّل المبلغ ثم أرسل الإثبات.';
+   const message=['طلب خدمة Instagram من موقع ليث','رقم الطلب: '+result.orderCode,'اسم المستخدم: @'+user,'الخدمة: '+result.service,'المبلغ: '+Number(result.price).toLocaleString('en-US')+' د.ع','سأرفق إثبات الدفع.'].join('\n');
+   const telegram=document.getElementById('orderTelegram');
+   if(telegram)telegram.href='https://t.me/share/url?url='+encodeURIComponent('https://laythaziz.vercel.app')+'&text='+encodeURIComponent(message);
+   say('تم إنشاء الطلب بنجاح. احتفظ برقم الطلب.');
+   form.querySelector('button[type="submit"]').hidden=true;
+  }catch(error){say(error.message||'تعذر إرسال الطلب. حاول لاحقاً.',true);}
+  finally{button.disabled=false;button.textContent='تأكيد الطلب';}
  });
+ loadCatalog();
 })();
-
 
 /* Non-blocking Telegram proxy refresh: keep the last good list visible. */
 (()=>{
