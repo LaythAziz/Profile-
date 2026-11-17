@@ -157,13 +157,13 @@ test('admin visitor records are protected by owner-only database access', () => 
 });
 
 test('admin dashboard restores the last selected section after refresh and places site link on the left', () => {
-  const html = fs.readFileSync(path.join(root, 'admin-dashboard.html'), 'utf8');
+  const html = fs.readFileSync(path.join(root, 'control-center.html'), 'utf8');
   const js = fs.readFileSync(path.join(root, 'assets/admin-dashboard.js'), 'utf8');
   const css = fs.readFileSync(path.join(root, 'assets/admin.css'), 'utf8');
   assert.match(js, /profileAdminView/);
   assert.match(js, /sessionStorage\.getItem\(VIEW_KEY\)/);
   assert.match(css, /\.dashboard-header[^{]*\{[^}]*direction:ltr/s);
-  assert.match(css, /\.dashboard-header \.back-link[^}]*order:1/s);
+  assert.match(css, /\.dashboard-header \.back-link[^}]*order:-1/s);
 });
 
 test('admin service editor updates descriptions, toggles visibility, and permanently deletes a selected service', () => {
