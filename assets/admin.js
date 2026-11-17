@@ -81,7 +81,7 @@ verifyForm.addEventListener('submit', async event => {
       throw new Error('تم التحقق من البريد، لكن هذا الحساب غير مسجل كمالك للوحة.');
     }
     message('تم التحقق بنجاح. صلاحية المالك مؤكدة.');
-    window.location.replace('/admin-dashboard.html');
+    window.location.replace('/control-center.html');
   } catch (error) {
     message(error.message || 'رمز غير صحيح أو منتهي الصلاحية.', true);
   } finally { busy(verifyButton, false); }
@@ -90,5 +90,5 @@ verifyForm.addEventListener('submit', async event => {
 const { data: { session } } = await supabase.auth.getSession();
 if (session?.user?.email?.toLowerCase() === OWNER_EMAIL) {
   const { data: admin } = await supabase.from('admin_users').select('role,is_active').eq('user_id', session.user.id).maybeSingle();
-  if (admin?.role === 'owner' && admin.is_active) window.location.href = '/admin-dashboard.html';
+  if (admin?.role === 'owner' && admin.is_active) window.location.href = '/control-center.html';
 }
