@@ -195,33 +195,23 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 if (location.hash) history.replaceState(null, '', location.pathname + location.search);
 window.addEventListener('pageshow', () => window.scrollTo({top:0,left:0,behavior:'auto'}));
 
-// Privacy-friendly page-view counter: stores only the page path, not personal identifiers.
-(()=>{if(document.visibilityState==='prerender')return;fetch('https://nbqvdvtaqvfwkcvmhled.supabase.co/functions/v1/track-profile-view',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'},body:JSON.stringify({path:location.pathname}),keepalive:true}).catch(()=>{});})();
-
-
-// Privacy-first visitor analytics: no tracking until the visitor explicitly opts in.
-(()=> {
- const KEY='profileAnalyticsConsent',NAME_KEY='profileAnalyticsName',SESSION_KEY='profileAnalyticsSession';
- const endpoint='https://nbqvdvtaqvfwkcvmhled.supabase.co/functions/v1/track-profile-view';
- const readName=()=>{try{return sessionStorage.getItem(NAME_KEY)||'';}catch{return '';}};
+// Visitor analytics: optional name + anonymous visit/device statistics. Full IP addresses are never read or stored.
+(()=>{
+ const NAME_KEY='profileAnalyticsName',SESSION_KEY='profileAnalyticsSession',endpoint='https://nbqvdvtaqvfwkcvmhled.supabase.co/functions/v1/track-profile-view';
  const getSession=()=>{try{let id=sessionStorage.getItem(SESSION_KEY);if(!id){id=crypto.randomUUID();sessionStorage.setItem(SESSION_KEY,id);}return id;}catch{return crypto.randomUUID();}};
- let timer=null,hasViewed=false;
- const send=async eventType=>{
-  if(localStorage.getItem(KEY)!=='accepted')return;
-  try{await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'},keepalive:eventType==='page_view',body:JSON.stringify({consent:true,eventType,path:location.pathname,sessionId:getSession(),visitorName:readName()})});}catch{/* Analytics must never block the portfolio. */}
- };
- const start=()=>{if(timer)return;send(hasViewed?'heartbeat':'page_view');hasViewed=true;timer=setInterval(()=>send('heartbeat'),10000);};
+ let timer=null,hasViewed=false,lastPath=location.pathname;
+ const getName=()=>{try{return sessionStorage.getItem(NAME_KEY)||'';}catch{return '';}};
+ const send=async eventType=>{try{await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'},keepalive:eventType==='page_view',body:JSON.stringify({eventType,path:location.pathname,sessionId:getSession(),visitorName:getName()})});}catch{/* Analytics never blocks the portfolio. */}};
+ const start=()=>{if(timer)return;send(hasViewed?'heartbeat':'page_view');hasViewed=true;timer=setInterval(()=>{if(location.pathname!==lastPath){lastPath=location.pathname;send('page_view');}else send('heartbeat');},10000);};
  const stop=()=>{if(timer)clearInterval(timer);timer=null;};
- const banner=document.createElement('aside');banner.className='privacy-consent';banner.setAttribute('aria-label','إعدادات الخصوصية');banner.hidden=true;
- banner.innerHTML='<div class="privacy-copy"><strong>خصوصيتك مهمة</strong><p>بموافقتك، نجمع عنوان IP الكامل ونوع الجهاز والمتصفح والصفحات التي تزورها، ونسجل نبضة نشاط كل 10 ثوانٍ طوال بقاءك في الموقع. يحتفظ مالك الموقع بهذه البيانات دون حذف تلقائي. لا نستنتج اسمك الحقيقي؛ يمكنك إدخال اسم اختياري لربط زيارتك به.</p><label>اسمك (اختياري)<input class="privacy-name" maxlength="80" autocomplete="name" placeholder="اكتب اسمك إذا رغبت"></label></div><div class="privacy-actions"><button type="button" data-consent-yes>موافق وأتابع</button><button type="button" data-consent-no>رفض</button></div>';
- document.body.append(banner);
- const settings=document.createElement('button');settings.type='button';settings.className='privacy-settings';settings.textContent='إعدادات الخصوصية';settings.hidden=true;document.body.append(settings);
- const show=()=>{banner.hidden=false;settings.hidden=true;};
- const accepted=localStorage.getItem(KEY);
- if(accepted==='accepted'){start();settings.hidden=false;}else if(accepted!=='rejected')show();else settings.hidden=false;
- banner.querySelector('[data-consent-yes]').addEventListener('click',()=>{const name=banner.querySelector('.privacy-name').value.trim().slice(0,80);try{localStorage.setItem(KEY,'accepted');sessionStorage.setItem(NAME_KEY,name);}catch{}banner.hidden=true;settings.hidden=false;start();});
- banner.querySelector('[data-consent-no]').addEventListener('click',()=>{try{localStorage.setItem(KEY,'rejected');}catch{}banner.hidden=true;settings.hidden=false;stop();});
+ const panel=document.createElement('aside');panel.className='privacy-consent';panel.setAttribute('aria-label','اسم الزائر');panel.innerHTML='<div class="privacy-copy"><strong>اسمك (اختياري)</strong><p>يمكنك إدخال اسم لعرضه بجانب زيارتك في لوحة الإدارة. نسجل إحصائيات الزيارات ونوع الجهاز والمتصفح دون حفظ عنوان IP.</p><label>اسمك<input class="privacy-name" maxlength="80" autocomplete="name" placeholder="اكتب اسمك (اختياري)"></label></div><div class="privacy-actions"><button type="button" data-continue>موافق وأتابع</button></div>';
+ document.body.append(panel);
+ const settings=document.createElement('button');settings.type='button';settings.className='privacy-settings';settings.textContent='تعديل الاسم';settings.hidden=true;document.body.append(settings);
+ const show=()=>{panel.hidden=false;settings.hidden=true;panel.querySelector('.privacy-name').value=getName();};
+ const stored=getName();if(stored){settings.hidden=false;start();}else show();
+ const save=()=>{const name=panel.querySelector('.privacy-name').value.trim().slice(0,80);try{sessionStorage.setItem(NAME_KEY,name);}catch{}panel.hidden=true;settings.hidden=false;start();};
+ panel.querySelector('[data-continue]').addEventListener('click',save);
  settings.addEventListener('click',show);
- document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else if(localStorage.getItem(KEY)==='accepted')start();});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else start();});
  window.addEventListener('pagehide',stop);
 })();
