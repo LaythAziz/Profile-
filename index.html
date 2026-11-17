@@ -86,6 +86,7 @@ section.content-section{padding:105px 0;border-top:1px solid var(--line);positio
 .proxy-entry small{display:block;color:var(--muted);font-size:10px;margin-top:5px}
 .proxy-entry a{display:block;text-align:center;text-decoration:none;border:1px solid #51f5dc70;background:#51f5dc12;color:#8bf6e7;border-radius:9px;padding:11px 10px;font-size:11px;font-weight:700}
 .proxy-entry a:hover{background:#51f5dc25}
+.proxy-refresh-btn{margin-top:10px;border:1px solid #51f5dc70;background:#51f5dc12;color:#8bf6e7;border-radius:9px;padding:10px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}.proxy-refresh-btn:hover{background:#51f5dc25}
 .proxy-help{margin-top:15px;padding:13px 15px;border-radius:11px;background:#ffffff06;color:#b9c9c2;font-size:11px;line-height:1.9}.proxy-help b{color:#eaf3ef}
 .proxy-disclaimer{margin-top:12px;color:var(--muted);font-size:10px;line-height:1.8}
 @media(max-width:650px){.proxy-list{grid-template-columns:1fr}.proxy-entry{padding:13px}}
@@ -214,16 +215,72 @@ document.querySelector('[data-copy-payment]')?.addEventListener('click',async()=
 document.querySelector('#serviceForm')?.addEventListener('submit',e=>{e.preventDefault();const user=document.querySelector('#igUser').value.trim();const note=document.querySelector('#orderNote').value.trim();const msg='طلب خدمة Instagram من بروفايل ليث%0Aاسم المستخدم: '+encodeURIComponent(user)+'%0Aالسعر المعروض: 20,000 د.ع%0Aملاحظة: '+encodeURIComponent(note||'—')+'%0Aسأرفق إثبات التحويل في المحادثة.';window.open('https://t.me/share/url?url='+encodeURIComponent('https://github.com/LaythAziz/Profile-')+'&text='+msg,'_blank','noopener,noreferrer');});
 
 
-/* Live Telegram MTProto proxy feed: public, handshake-verified upstream list */
-(()=>{const list=document.getElementById('proxy-live-list'),status=document.getElementById('proxy-live-status');if(!list||!status)return;
-const feed='https://raw.githubusercontent.com/iwizard7/MTProxy_list/data/working.txt';
-const escapeHtml=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-async function refreshProxyList(){try{const response=await fetch(feed+'?v='+Math.floor(Date.now()/600000),{cache:'no-store'});if(!response.ok)throw new Error('feed unavailable');const body=await response.text();const links=[...new Set(body.split(/\r?\n/).map(x=>x.trim()).filter(x=>/^tg:\/\/proxy\?/.test(x)))].slice(0,6);if(!links.length)throw new Error('no verified links');
-list.innerHTML=links.map((link,index)=>{const u=new URL(link),server=u.searchParams.get('server')||'Telegram MTProto',port=u.searchParams.get('port')||'—';return '<article class="proxy-entry"><div><strong>'+escapeHtml(server)+'</strong><small>MTProto · Port '+escapeHtml(port)+' · ضمن القائمة المجتازة للفحص</small></div><a href="'+escapeHtml(link)+'" rel="noopener">فتح Telegram وإضافة البروكسي</a></article>'}).join('');
-status.innerHTML='<p>تم تحميل '+links.length+' بروكسيات من قائمة اجتازت فحص MTProto لدى المصدر.</p><span class="proxy-live-pill"><i></i> تم التحديث</span>';
-}catch(error){status.innerHTML='<p>تعذر تحميل خوادم الاتصال حالياً. اضغط تحديث الصفحة أو حاول بعد قليل.</p>';}}
-refreshProxyList();setInterval(refreshProxyList,10*60*1000);
-})();
+/* Live Telegram MTProto proxy directory — refreshed public, upstream-verified feeds */
+(()=> {
+ const list=document.getElementById('proxy-live-list');
+ const status=document.getElementById('proxy-live-status');
+ if(!list||!status)return;
+
+ const feeds=[
+  {name:'0xRadikal · Resilient',url:'https://raw.githubusercontent.com/0xRadikal/Free-Telegram-Proxy/main/resilient/tme.txt'},
+  {name:'iwizard7 · Stable',url:'https://raw.githubusercontent.com/iwizard7/MTProxy_list/data/stable.txt'}
+ ];
+ const escapeHtml=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ const toTelegramLink=(raw)=>{
+  try{
+   const u=new URL(raw.trim());
+   if(u.protocol==='tg:' && u.hostname==='proxy'){
+    const p=new URLSearchParams(u.search);
+    const server=p.get('server'),port=p.get('port'),secret=p.get('secret');
+    if(!server||!port||!secret||!/^\\d+$/.test(port)||+port<1||+port>65535||!/^[a-zA-Z0-9_-]+$/.test(secret))return null;
+    const out=new URL('https://t.me/proxy');
+    out.searchParams.set('server',server);out.searchParams.set('port',port);out.searchParams.set('secret',secret);
+    return {href:out.toString(),server,port,key:server+':'+port};
+   }
+   if((u.protocol==='https:'||u.protocol==='http:')&&['t.me','telegram.me','telegram.dog'].includes(u.hostname)&&u.pathname==='/proxy'){
+    const server=u.searchParams.get('server'),port=u.searchParams.get('port'),secret=u.searchParams.get('secret');
+    if(!server||!port||!secret||!/^\\d+$/.test(port)||+port<1||+port>65535||!/^[a-zA-Z0-9_-]+$/.test(secret))return null;
+    const out=new URL('https://t.me/proxy');
+    out.searchParams.set('server',server);out.searchParams.set('port',port);out.searchParams.set('secret',secret);
+    return {href:out.toString(),server,port,key:server+':'+port};
+   }
+  }catch(e){}
+  return null;
+ };
+ let refreshing=false;
+ async function refreshProxyList(){
+  if(refreshing)return;
+  refreshing=true;
+  status.innerHTML='<p>جارٍ جلب أحدث البروكسيات من المصادر وفحص بياناتها…</p>';
+  try{
+   let parsed=[],sourceName='';
+   for(const feed of feeds){
+    try{
+     const response=await fetch(feed.url+'?v='+Date.now(),{cache:'no-store'});
+     if(!response.ok)throw new Error('feed unavailable');
+     const body=await response.text();
+     const rows=body.split(/\\r?\\n/).map(toTelegramLink).filter(Boolean);
+     const unique=[...new Map(rows.map(x=>[x.key,x])).values()];
+     if(!unique.length)throw new Error('empty feed');
+     parsed=unique;sourceName=feed.name;break;
+    }catch(e){continue;}
+   }
+   if(!parsed.length)throw new Error('all proxy sources unavailable');
+   const shown=parsed.slice(0,8);
+   list.innerHTML=shown.map((proxy,index)=>'<article class="proxy-entry"><div><strong>'+escapeHtml(proxy.server)+'</strong><small>MTProto · Port '+escapeHtml(proxy.port)+' · '+(index===0?'اختيار مقترح':'متاح للإضافة')+'</small></div><a href="'+escapeHtml(proxy.href)+'" target="_blank" rel="noopener noreferrer">فتح Telegram وإضافة البروكسي</a></article>').join('');
+   const updated=new Date().toLocaleString('ar-IQ',{dateStyle:'medium',timeStyle:'short'});
+   status.innerHTML='<p>تم جلب '+shown.length+' بروكسيات من قائمة اجتازت فحوص MTProto لدى المصدر. المصدر: '+escapeHtml(sourceName)+' · آخر جلب: '+escapeHtml(updated)+'</p><button type="button" class="proxy-refresh-btn" id="proxy-refresh-now">تحديث البروكسيات</button>';
+  }catch(error){
+   status.innerHTML='<p>تعذر جلب قائمة البروكسيات الآن. حاول التحديث بعد قليل.</p><button type="button" class="proxy-refresh-btn" id="proxy-refresh-now">إعادة المحاولة</button>';
+   list.innerHTML='';
+  }finally{
+   refreshing=false;
+  }
+ }
+ status.addEventListener('click',event=>{if(event.target&&event.target.id==='proxy-refresh-now')refreshProxyList();});
+ refreshProxyList();
+ setInterval(refreshProxyList,10*60*1000);
+})();;
 </script>
 <script>
 /* Always start at the hero on a fresh load/refresh; in-page links still work normally. */
