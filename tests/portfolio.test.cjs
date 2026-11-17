@@ -167,7 +167,7 @@ test('admin dashboard restores the last selected section after refresh and place
 });
 
 test('admin service editor updates descriptions, toggles visibility, and permanently deletes a selected service', () => {
-  const html = fs.readFileSync(path.join(root, 'admin-dashboard.html'), 'utf8');
+  const html = fs.readFileSync(path.join(root, 'control-center.html'), 'utf8');
   const js = fs.readFileSync(path.join(root, 'assets/admin-dashboard.js'), 'utf8');
   assert.match(html, /id="new-service-form"/);
   assert.match(js, /service-description-input/);
