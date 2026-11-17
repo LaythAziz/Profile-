@@ -153,7 +153,7 @@ section.content-section{padding:clamp(82px,9vw,124px) 0;border-top-color:#d8fff0
 </head>
 <body>
 <div class="progress" id="progress"></div>
-<header class="topbar"><div class="wrap"><nav class="nav" aria-label="التنقل الرئيسي"><div class="navlinks"><a href="#about">من أنا</a><a href="#skills">ماذا أتقن</a><a href="#work">أعمالي</a><a href="#services">خدمات</a><a href="#contact">تواصل معي</a></div><a class="nav-cta" href="#contact"><span class="status-led" aria-hidden="true"></span>متاح للعمل</a></nav></div></header>
+<header class="topbar"><div class="wrap"><nav class="nav" aria-label="التنقل الرئيسي"><div class="navlinks"><a href="#home">الرئيسية</a><a href="#about">من أنا</a><a href="#skills">مهاراتي</a><a href="#work">أعمالي</a><a href="#services">خدمات</a><a href="#telegram-proxy-manager">Telegram</a><a href="#contact">تواصل</a></div><a class="nav-cta" href="#contact"><span class="status-led" aria-hidden="true"></span>متاح للعمل</a></nav></div></header>
 <main>
 <section class="hero" id="home"><canvas id="particles" aria-hidden="true"></canvas><div class="grid-glow" id="gridGlow"></div><div class="wrap hero-grid">
 <div class="hero-copy">
@@ -272,7 +272,7 @@ document.querySelectorAll('[data-project-card]').forEach(card=>{
 });
 if('IntersectionObserver'in window){const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');revealObserver.unobserve(entry.target)}}),{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));}else{document.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}
 const sections=[...document.querySelectorAll('main section[id]')],navLinks=[...document.querySelectorAll('.navlinks a')],progress=document.querySelector('#progress');
-function onScroll(){const max=document.documentElement.scrollHeight-innerHeight;progress.style.width=(max>0?scrollY/max*100:0)+'%';let current=sections.filter(s=>scrollY>=s.offsetTop-170).pop();navLinks.forEach(a=>a.classList.toggle('active',!!current&&a.getAttribute('href')==='#'+current.id))}
+function onScroll(){const max=document.documentElement.scrollHeight-innerHeight;progress.style.width=(max>0?scrollY/max*100:0)+'%';let current=sections.filter(s=>scrollY>=s.offsetTop-170).pop();navLinks.forEach(a=>{const active=!!current&&a.getAttribute('href')==='#'+current.id;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')})}
 window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 const hero=document.querySelector('.hero'),glow=document.querySelector('#gridGlow');
 if(!reduceMotion&&matchMedia('(pointer:fine)').matches){hero.addEventListener('pointermove',e=>{const r=hero.getBoundingClientRect();glow.style.setProperty('--mx',(e.clientX-r.left)+'px');glow.style.setProperty('--my',(e.clientY-r.top)+'px')});}
