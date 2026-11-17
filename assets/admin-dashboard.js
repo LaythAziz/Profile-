@@ -31,7 +31,8 @@ async function loadAnalytics(){
  if(visitorError)throw visitorError;if(eventsError)throw eventsError;
  const visitors=visitorsData||[],events=eventsData||[];
  const active=visitors.filter(v=>Date.now()-new Date(v.last_seen).getTime()<30000).length;
- const ips=new Set(visitors.map(v=>v.ip_address).filter(Boolean));\n const ipTotals=new Map();for(const v of visitors){const key=v.ip_address||'غير متاح',total=ipTotals.get(key)||{views:0,sessions:0};total.views+=Number(v.page_views||0);total.sessions++;ipTotals.set(key,total);}
+ const ips=new Set(visitors.map(v=>v.ip_address).filter(Boolean));
+ const ipTotals=new Map();for(const v of visitors){const key=v.ip_address||'غير متاح',total=ipTotals.get(key)||{views:0,sessions:0};total.views+=Number(v.page_views||0);total.sessions++;ipTotals.set(key,total);}
  $('#analytics-stats').innerHTML=stats([['الطلبات',ordersCount??0],['مشاهدات الصفحات',views??0],['الزوار النشطون الآن',active],['عناوين IP المسجلة',ips.size],['نبضات النشاط',beats??0]]);
  const query=($('#visitor-search')?.value||'').trim().toLocaleLowerCase();
  const filtered=visitors.filter(v=>[v.ip_address,v.visitor_name,v.device_type,v.os_name,v.browser_name,(v.pages||[]).join(' ')].join(' ').toLocaleLowerCase().includes(query));
