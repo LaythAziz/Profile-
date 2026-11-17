@@ -106,3 +106,10 @@ test('Telegram proxy endpoint returns a non-cacheable error when all sources fai
     global.fetch = originalFetch;
   }
 });
+
+test('service checkout validates Instagram usernames and builds a readable Telegram message', () => {
+  const js = fs.readFileSync(path.join(root, 'assets/profile.js'), 'utf8');
+  assert.match(js, /input\.setCustomValidity/);
+  assert.ok(js.includes("].join('\\n')"));
+  assert.match(js, /replace\(\/\^@\//);
+});
