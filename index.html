@@ -232,14 +232,14 @@ document.querySelector('#serviceForm')?.addEventListener('submit',e=>{e.preventD
    if(u.protocol==='tg:' && u.hostname==='proxy'){
     const p=new URLSearchParams(u.search);
     const server=p.get('server'),port=p.get('port'),secret=p.get('secret');
-    if(!server||!port||!secret||!/^\\d+$/.test(port)||+port<1||+port>65535||!/^[a-zA-Z0-9_-]+$/.test(secret))return null;
+    if(!server||!port||!secret||!/^\d+$/.test(port)||+port<1||+port>65535||!/^[a-zA-Z0-9_-]+$/.test(secret))return null;
     const out=new URL('https://t.me/proxy');
     out.searchParams.set('server',server);out.searchParams.set('port',port);out.searchParams.set('secret',secret);
     return {href:out.toString(),server,port,key:server+':'+port};
    }
    if((u.protocol==='https:'||u.protocol==='http:')&&['t.me','telegram.me','telegram.dog'].includes(u.hostname)&&u.pathname==='/proxy'){
     const server=u.searchParams.get('server'),port=u.searchParams.get('port'),secret=u.searchParams.get('secret');
-    if(!server||!port||!secret||!/^\\d+$/.test(port)||+port<1||+port>65535||!/^[a-zA-Z0-9_-]+$/.test(secret))return null;
+    if(!server||!port||!secret||!/^\d+$/.test(port)||+port<1||+port>65535||!/^[a-zA-Z0-9_-]+$/.test(secret))return null;
     const out=new URL('https://t.me/proxy');
     out.searchParams.set('server',server);out.searchParams.set('port',port);out.searchParams.set('secret',secret);
     return {href:out.toString(),server,port,key:server+':'+port};
@@ -259,7 +259,7 @@ document.querySelector('#serviceForm')?.addEventListener('submit',e=>{e.preventD
      const response=await fetch(feed.url+'?v='+Date.now(),{cache:'no-store'});
      if(!response.ok)throw new Error('feed unavailable');
      const body=await response.text();
-     const rows=body.split(/\\r?\\n/).map(toTelegramLink).filter(Boolean);
+     const rows=body.split(/\r?\n/).map(toTelegramLink).filter(Boolean);
      const unique=[...new Map(rows.map(x=>[x.key,x])).values()];
      if(!unique.length)throw new Error('empty feed');
      parsed=unique;sourceName=feed.name;break;
