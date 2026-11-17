@@ -67,10 +67,10 @@ if(particlesEnabled&&canvas&&ctx){
    if(!response.ok)throw new Error('catalog');
    const services=await response.json();
    const existing=new Map([...document.querySelectorAll('.offer-item')].map(item=>[item.querySelector('.offer-no')?.textContent.trim(),item]));
-   let addedGroup=null,addedItems=null;
+   let addedGroup=null,addedItems=null;const seen=new Set();
    for(const service of services){
     const code=String(service.service_code||'').trim();
-    if(!code)continue;
+    if(!code)continue;seen.add(code);
     let item=existing.get(code);
     if(!item){
      if(!addedGroup){
@@ -81,7 +81,7 @@ if(particlesEnabled&&canvas&&ctx){
       addedGroup.append(summary,addedItems);list?.append(addedGroup);
      }
      item=document.createElement('div');item.className='offer-item';item.innerHTML='<span class="offer-no"></span><span></span>';
-     addedItems.append(item);
+     addedItems.append(item);groups.push(addedGroup);
     }
     item.dataset.serviceCode=code;item.dataset.active=String(service.is_active);item.hidden=!service.is_active;
     const no=item.querySelector('.offer-no');if(no)no.textContent=code.padStart(2,'0');
@@ -89,6 +89,7 @@ if(particlesEnabled&&canvas&&ctx){
     if(label)label.textContent=service.name_ar+(service.description_ar?' — '+service.description_ar:'')+' · '+formatPrice(service.price,service.currency);
     item.setAttribute('tabindex','0');item.setAttribute('role','button');
    }
+   existing.forEach((item,code)=>{if(!seen.has(code))item.hidden=true;});
    groups.forEach(group=>{
     const items=[...group.querySelectorAll('.offer-item')].filter(item=>!item.hidden);
     const count=group.querySelector('.group-count');if(count)count.textContent=items.length+' خدمات';
@@ -134,7 +135,7 @@ if(particlesEnabled&&canvas&&ctx){
   const code=hiddenCode.value.trim(),note=document.getElementById('orderNote').value.trim();
   if(!/^[A-Za-z0-9._]{1,30}$/.test(user)){input.setCustomValidity('اكتب اسم مستخدم Instagram صحيحاً.');input.reportValidity();return;}
   input.setCustomValidity('');
-  if(!/^\d{2}$/.test(code)){say('اختَر خدمة محددة من قائمة الخدمات أولاً.',true);return;}
+  if(!/^\d{2,4}$/.test(code)){say('اختَر خدمة محددة من قائمة الخدمات أولاً.',true);return;}
   const button=document.getElementById('submitServiceOrder');button.disabled=true;button.textContent='جارٍ تسجيل الطلب…';say('يتم حفظ طلبك بشكل آمن…');
   try{
    const response=await fetch('https://nbqvdvtaqvfwkcvmhled.supabase.co/functions/v1/create-profile-order',{
@@ -204,12 +205,12 @@ window.addEventListener('pageshow', () => window.scrollTo({top:0,left:0,behavior
  const endpoint='https://nbqvdvtaqvfwkcvmhled.supabase.co/functions/v1/track-profile-view';
  const readName=()=>{try{return sessionStorage.getItem(NAME_KEY)||'';}catch{return '';}};
  const getSession=()=>{try{let id=sessionStorage.getItem(SESSION_KEY);if(!id){id=crypto.randomUUID();sessionStorage.setItem(SESSION_KEY,id);}return id;}catch{return crypto.randomUUID();}};
- let timer=null;
+ let timer=null,hasViewed=false;
  const send=async eventType=>{
   if(localStorage.getItem(KEY)!=='accepted')return;
   try{await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'},keepalive:eventType==='page_view',body:JSON.stringify({consent:true,eventType,path:location.pathname,sessionId:getSession(),visitorName:readName()})});}catch{/* Analytics must never block the portfolio. */}
  };
- const start=()=>{if(timer)return;send('page_view');timer=setInterval(()=>send('heartbeat'),10000);};
+ const start=()=>{if(timer)return;send(hasViewed?'heartbeat':'page_view');hasViewed=true;timer=setInterval(()=>send('heartbeat'),10000);};
  const stop=()=>{if(timer)clearInterval(timer);timer=null;};
  const banner=document.createElement('aside');banner.className='privacy-consent';banner.setAttribute('aria-label','إعدادات الخصوصية');banner.hidden=true;
  banner.innerHTML='<div class="privacy-copy"><strong>خصوصيتك مهمة</strong><p>بموافقتك، نجمع عنوان IP الكامل ونوع الجهاز والمتصفح والصفحات التي تزورها، ونسجل نبضة نشاط كل 10 ثوانٍ طوال بقاءك في الموقع. يحتفظ مالك الموقع بهذه البيانات دون حذف تلقائي. لا نستنتج اسمك الحقيقي؛ يمكنك إدخال اسم اختياري لربط زيارتك به.</p><label>اسمك (اختياري)<input class="privacy-name" maxlength="80" autocomplete="name" placeholder="اكتب اسمك إذا رغبت"></label></div><div class="privacy-actions"><button type="button" data-consent-yes>موافق وأتابع</button><button type="button" data-consent-no>رفض</button></div>';
