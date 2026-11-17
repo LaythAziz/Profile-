@@ -90,6 +90,65 @@ section.content-section{padding:105px 0;border-top:1px solid var(--line);positio
 .proxy-help{margin-top:15px;padding:13px 15px;border-radius:11px;background:#ffffff06;color:#b9c9c2;font-size:11px;line-height:1.9}.proxy-help b{color:#eaf3ef}
 .proxy-disclaimer{margin-top:12px;color:var(--muted);font-size:10px;line-height:1.8}
 @media(max-width:650px){.proxy-list{grid-template-columns:1fr}.proxy-entry{padding:13px}}
+/* PROFILE 2026 — unified visual system */
+:root{--bg:#06090c;--panel:#0c1216;--panel2:#10191d;--text:#f3f8f6;--muted:#9aa9a4;--line:#d8fff014;--lime:#c8ff4d;--cyan:#59e9d8;--blue:#6b9cff;--max:1180px;--ease:cubic-bezier(.2,.75,.25,1)}
+html{scroll-padding-top:108px;scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 82% 8%,#b9ff4810,transparent 25%),radial-gradient(ellipse at 8% 56%,#43dfd90b,transparent 28%),#06090c}
+.wrap{width:min(var(--max),calc(100% - 52px))}
+.topbar{top:max(10px,env(safe-area-inset-top));z-index:50}
+.nav{height:66px;border-radius:18px;padding:0 20px;background:rgba(8,13,16,.82);border-color:#b8ffe01c;box-shadow:0 16px 48px #0007,inset 0 1px #ffffff08;backdrop-filter:blur(24px) saturate(145%)}
+.navlinks{gap:5px}.navlinks a{font-size:12px;padding:11px 15px;white-space:nowrap;transition:background .25s,color .25s,transform .25s}.navlinks a:hover{transform:translateY(-1px)}.navlinks a.active{background:linear-gradient(135deg,#c8ff4d17,#59e9d80c);box-shadow:inset 0 0 0 1px #c8ff4d20}
+.nav-cta{border-radius:12px;padding:10px 16px;font-size:11px}
+.hero{min-height:min(860px,100svh);padding:160px 0 112px}.hero-grid{gap:clamp(35px,6vw,82px)}.hero h1{font-size:clamp(56px,7.2vw,96px);line-height:1.12;letter-spacing:-3.4px}.intro{font-size:15px;line-height:2.05;max-width:610px}
+.btn{height:50px;border-radius:12px;padding-inline:22px;transition:transform .28s,box-shadow .28s,border-color .28s}.btn:hover{transform:translateY(-3px)}
+.portrait-frame{border-radius:190px 190px 28px 28px;box-shadow:0 0 100px #c5ff4814,0 35px 90px #000b}
+section.content-section{padding:clamp(82px,9vw,124px) 0;border-top-color:#d8fff00d}.section-head{margin-bottom:42px;align-items:flex-end}.section-head h2{font-size:clamp(34px,4.3vw,54px);letter-spacing:-1.8px}.section-head p{font-size:13px;line-height:2;max-width:390px}
+.surface{border-radius:22px;border-color:#d8fff018;background:linear-gradient(145deg,rgba(17,26,29,.94),rgba(8,14,17,.96));box-shadow:0 22px 65px #0003,inset 0 1px #ffffff08}
+.about-grid{gap:20px}.about-copy{font-size:17px;line-height:2.25}.location-card{min-height:340px}
+.skills-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:13px}.skill{min-height:112px;border-radius:16px;padding:19px 16px;background:linear-gradient(145deg,#10181b,#0a1013);border-color:#d8fff016}.skill span{font-size:11px}
+.projects{gap:18px}.project{min-height:280px;border-radius:22px;padding:30px;transition:transform .3s,border-color .3s,box-shadow .3s}.project:hover{transform:translateY(-5px);border-color:#59e9d84a;box-shadow:0 26px 70px #0005,0 0 35px #59e9d80a}
+.services-grid{gap:20px}.service-card,.offers-panel,.order-panel{border-radius:22px;padding:clamp(22px,3.3vw,34px);box-shadow:0 22px 60px #0004,inset 0 1px #ffffff08}.service-card h3{font-size:clamp(22px,2.5vw,30px)}.service-desc,.order-panel p{font-size:14px;line-height:2.05}.service-price strong{font-size:clamp(34px,4vw,44px)}
+.offer-group{border-radius:16px;border-color:#d8fff017;background:#080e11}.offer-group summary{padding:20px 21px}.offer-group[open]{border-color:#59e9d849}.offer-item{padding:14px 0;line-height:1.9}#service-order{scroll-margin-top:105px}
+.contact-layout{gap:20px}.social{border-radius:15px;transition:transform .25s,border-color .25s,background .25s}.social:hover{transform:translateY(-3px);border-color:#59e9d84a;background:#59e9d809}
+.footer{border-top-color:#d8fff014}.footer-inner{min-height:100px}.back-top .home-mark{transition:transform .25s,box-shadow .25s}.back-top:hover .home-mark{transform:translateY(-3px);box-shadow:0 0 25px #c5ff4822}
+#progress{height:2px;background:linear-gradient(90deg,var(--cyan),var(--lime));box-shadow:0 0 14px #59e9d877}.reveal{transition:opacity .7s,transform .7s}
+/* Proxy panel: immediate feedback, previous results stay visible during refresh */
+.proxy-section{overflow:hidden}.proxy-shell{position:relative;overflow:hidden;padding:clamp(22px,4vw,38px);border:1px solid #59e9d82a;border-radius:28px;background:radial-gradient(ellipse at 90% 0%,#59e9d811,transparent 38%),linear-gradient(145deg,#0e171bfa,#080e12fa);box-shadow:0 28px 80px #0005,inset 0 1px #ffffff09}
+.proxy-shell:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.25;background-image:linear-gradient(#ffffff06 1px,transparent 1px),linear-gradient(90deg,#ffffff06 1px,transparent 1px);background-size:36px 36px;mask-image:linear-gradient(130deg,#000,transparent 68%)}
+.proxy-heading-row,.proxy-toolbar,.proxy-footer{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:18px}.proxy-heading-row{align-items:flex-start}
+.proxy-heading-copy h2{font-size:clamp(28px,4vw,40px);margin:12px 0 8px;letter-spacing:-1px}.proxy-heading-copy p{font-size:13px;color:var(--muted);margin:0;line-height:1.8}
+.proxy-status-chip{display:inline-flex;align-items:center;gap:9px;padding:10px 14px;border:1px solid #c8ff4d28;background:#c8ff4d0b;border-radius:99px;color:#d5f89a;font-size:11px;white-space:nowrap}.proxy-state-dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 5px #c8ff4d12,0 0 14px var(--lime);animation:proxyPulse 1.8s ease-in-out infinite}
+.proxy-status-chip[data-state="error"]{color:#ffb4a9;border-color:#ff887733;background:#ff88770b}.proxy-status-chip[data-state="error"] .proxy-state-dot{background:#ff8877;box-shadow:0 0 0 5px #ff887712}
+.proxy-toolbar{margin-top:25px;padding:15px 0;border-top:1px solid #ffffff0d;border-bottom:1px solid #ffffff0d}.proxy-toolbar p{margin:0;color:#b8c8c2;font-size:12px;line-height:1.8}
+.proxy-refresh-btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:43px;margin:0;padding:0 16px;border:1px solid #59e9d86b;border-radius:12px;background:linear-gradient(135deg,#59e9d81b,#59e9d809);color:#9af6e8;font:600 12px "IBM Plex Sans Arabic",sans-serif;cursor:pointer;white-space:nowrap;transition:background .25s,border-color .25s,transform .25s,box-shadow .25s}
+.proxy-refresh-btn:hover{transform:translateY(-2px);background:#59e9d822;box-shadow:0 8px 24px #59e9d812}.proxy-refresh-btn:disabled{opacity:.85;cursor:wait;transform:none}.proxy-refresh-icon{width:17px;height:17px;flex:0 0 17px}.proxy-refresh-btn.is-refreshing .proxy-refresh-icon{animation:proxySpin .85s linear infinite}
+.proxy-progress-track{position:relative;z-index:1;height:2px;margin-top:-1px;overflow:hidden;background:#ffffff08}.proxy-progress-track span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--cyan),var(--lime));box-shadow:0 0 12px var(--cyan)}.proxy-progress-track.is-active span{width:38%;animation:proxyProgress 1.15s ease-in-out infinite}
+.proxy-list{position:relative;z-index:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0 0}
+.proxy-entry{min-width:0;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:14px;padding:16px;border:1px solid #ffffff13;border-radius:17px;background:linear-gradient(140deg,#ffffff08,#ffffff03);transition:transform .25s,border-color .25s,background .25s}
+.proxy-entry:hover{transform:translateY(-2px);border-color:#59e9d847;background:#59e9d809}.proxy-entry strong{font:650 13px var(--mono);color:#f1f8f5;overflow-wrap:anywhere}.proxy-entry small{font-size:10px;color:#91a39c;display:block;margin-top:6px}
+.proxy-entry a{display:inline-flex;align-items:center;justify-content:center;min-height:39px;padding:8px 12px;border-radius:11px;border:1px solid #59e9d85a;background:#59e9d811;color:#91f3e4;font-size:10px;font-weight:700;white-space:nowrap;transition:background .2s,border-color .2s}.proxy-entry a:hover{background:#59e9d825;border-color:#59e9d8a0}
+.proxy-skeleton{min-height:88px;padding:16px;border:1px solid #ffffff10;border-radius:17px;background:#ffffff05;display:flex;flex-direction:column;justify-content:center;gap:10px;overflow:hidden}.proxy-skeleton span,.proxy-skeleton i,.proxy-skeleton b{display:block;height:9px;border-radius:99px;background:linear-gradient(90deg,#ffffff08,#ffffff18,#ffffff08);background-size:220% 100%;animation:proxyShimmer 1.35s linear infinite}.proxy-skeleton span{width:42%}.proxy-skeleton i{width:28%;height:7px}.proxy-skeleton b{width:55%;height:23px;margin-top:2px}
+.proxy-footer{margin-top:17px;padding-top:14px;border-top:1px solid #ffffff0c;color:#84958e;font-size:10px}.proxy-how summary{color:#9cefe2;cursor:pointer;list-style:none}.proxy-how summary::-webkit-details-marker{display:none}.proxy-how summary:after{content:"＋";margin-inline-start:8px}.proxy-how[open] summary:after{content:"－"}.proxy-how p{max-width:430px;color:#a7b7b0;line-height:1.9;margin:10px 0 0}
+.proxy-empty{grid-column:1/-1;display:flex;flex-direction:column;gap:7px;padding:22px;border:1px dashed #ff887744;border-radius:16px;color:#ffb4a9;font-size:13px}.proxy-empty small{color:#9aa9a4;font-size:11px}
+@keyframes proxySpin{to{transform:rotate(360deg)}}@keyframes proxyProgress{0%{transform:translateX(260%)}100%{transform:translateX(-290%)}}@keyframes proxyShimmer{to{background-position:-220% 0}}@keyframes proxyPulse{50%{opacity:.5;box-shadow:0 0 0 8px #c8ff4d08,0 0 8px var(--lime)}}
+@media(max-width:900px){.skills-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero-grid{gap:30px}.hero h1{font-size:clamp(54px,8vw,78px)}}
+@media(max-width:650px){
+ .wrap{width:calc(100% - 32px)}.topbar{top:max(7px,env(safe-area-inset-top))}.nav{height:60px;padding:0 9px;border-radius:16px;gap:8px}
+ .navlinks{flex:1;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}.navlinks::-webkit-scrollbar{display:none}.navlinks a{font-size:10px;padding:9px 10px}.nav-cta{margin:0;padding:8px 10px;font-size:9px;flex:0 0 auto}
+ .hero{min-height:auto;padding:128px 0 88px}.hero-grid{grid-template-columns:1fr;gap:28px}.hero-copy{order:1}.visual{order:0;height:310px}.portrait-frame{width:220px}.orbit{width:290px;height:290px}
+ .hero h1{font-size:clamp(48px,13vw,64px);letter-spacing:-2.2px;margin:17px 0 10px}.roles{font-size:12px;line-height:1.8}.intro{font-size:13px;line-height:2}
+ section.content-section{padding:76px 0}.section-head{align-items:flex-start;flex-direction:column;gap:12px;margin-bottom:28px}.section-head h2{font-size:35px}
+ .surface{border-radius:19px;padding:21px}.about-grid{grid-template-columns:1fr}.about-copy{font-size:14px}.location-card{min-height:290px}
+ .skills-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.skill{min-height:92px;padding:15px 12px}
+ .projects,.services-grid,.social-grid{grid-template-columns:1fr}.project{min-height:0;padding:23px}.service-card,.offers-panel,.order-panel{padding:21px}
+ .offer-group summary{grid-template-columns:52px minmax(0,1fr) 20px;gap:8px;padding:15px 12px}.group-count{display:none}.offer-group-items{grid-template-columns:1fr}
+ .proxy-shell{padding:20px 15px;border-radius:22px}.proxy-heading-row{gap:12px;align-items:flex-start}.proxy-heading-copy h2{font-size:29px}.proxy-heading-copy p{font-size:12px}.proxy-status-chip{padding:8px 10px;font-size:9px}
+ .proxy-toolbar{align-items:flex-start;flex-direction:column;gap:11px;margin-top:18px}.proxy-refresh-btn{width:100%}.proxy-list{grid-template-columns:1fr;gap:9px;margin-top:14px}
+ .proxy-entry{align-items:stretch;flex-direction:column;padding:14px}.proxy-entry a{width:100%;min-height:42px}.proxy-footer{align-items:flex-start;flex-direction:column;gap:9px}
+ .footer-inner{gap:13px}
+}
+@media(prefers-reduced-motion:reduce){.proxy-state-dot,.proxy-refresh-btn.is-refreshing .proxy-refresh-icon,.proxy-progress-track.is-active span,.proxy-skeleton span,.proxy-skeleton i,.proxy-skeleton b{animation:none!important}.proxy-progress-track.is-active span{width:100%}}
+.social.tellonym-social{gap:12px}.social.tellonym-social img{display:block;width:34px;height:26px;min-width:34px;object-fit:contain;object-position:center}
 </style>
 </head>
 <body>
@@ -181,7 +240,16 @@ section.content-section{padding:105px 0;border-top:1px solid var(--line);positio
 <div class="payment-number"><span>وسيلة الدفع · Mastercard</span><strong dir="ltr">7168 8438 73</strong><button class="copy-payment" type="button" data-copy-payment>نسخ الرقم</button></div>
 <p class="service-note">أرسل اسم المستخدم فقط، ولا تشارك كلمة المرور أو رموز الدخول.</p></div>
 <form class="service-form" id="serviceForm"><label for="igUser">اسم مستخدم Instagram</label><input id="igUser" name="igUser" placeholder="@username" autocomplete="off" required maxlength="30"><label for="orderNote">الخدمة المطلوبة / ملاحظات</label><textarea id="orderNote" name="orderNote" rows="3" placeholder="اكتب اسم الخدمة أو أي تفاصيل مختصرة"></textarea><button class="btn btn-primary" type="submit">متابعة عبر Telegram <span class="accent-dot"></span></button><small>أرفق إثبات الدفع بنفسك داخل المحادثة.</small></form></div>
-</div></section><section class="content-section" id="telegram-proxy-manager"><div class="wrap"><div class="proxy-manager reveal"><div class="proxy-manager-head"><div><span class="service-tag">TELEGRAM CONNECTION</span><h3>اتصال Telegram</h3><p>اختر خادماً واضغط الزر؛ سيفتح Telegram لإضافة البروكسي، وبعدها أكّد الاتصال داخل التطبيق.</p></div><span class="proxy-live-pill"><i></i> خوادم مجانية متجددة</span></div><div id="proxy-live-status" role="status" aria-live="polite" class="proxy-manager-foot"><p>جارٍ تحميل خوادم الاتصال…</p></div><div id="proxy-live-list" class="proxy-list"></div><div class="proxy-help"><b>طريقة الاستخدام:</b> اضغط «فتح Telegram وإضافة البروكسي»، وافق على فتح التطبيق، ثم اضغط «Use Proxy» أو «Connect». أضف أكثر من خادم وفعّل <b>Auto-Switch Proxies</b> من إعدادات Telegram إذا كان الخيار متاحاً عندك.</div></div></div></section>
+</div></section><section class="content-section proxy-section" id="telegram-proxy-manager">
+<div class="wrap"><div class="proxy-shell reveal">
+<div class="proxy-heading-row"><div class="proxy-heading-copy"><span class="service-tag">TELEGRAM NETWORK / MTPROTO</span><h2>اتصال Telegram</h2><p>اختر خادماً لإضافته مباشرة إلى تطبيق Telegram.</p></div>
+<div class="proxy-status-chip" id="proxy-state-chip" data-state="loading"><span class="proxy-state-dot"></span><span id="proxy-state-label">يتم التحقق</span></div></div>
+<div class="proxy-toolbar"><p id="proxy-live-status" role="status" aria-live="polite" aria-atomic="true">نجهّز قائمة الاتصال…</p>
+<button type="button" class="proxy-refresh-btn" id="proxy-refresh-now" aria-label="تحديث قائمة البروكسيات"><svg class="proxy-refresh-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M5.6 9A7 7 0 0 1 18 6.5L20 12M4 12l2 5.5A7 7 0 0 0 18.4 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>تحديث القائمة</span></button></div>
+<div class="proxy-progress-track" aria-hidden="true"><span></span></div>
+<div id="proxy-live-list" class="proxy-list" aria-busy="true"><div class="proxy-skeleton"><span></span><i></i><b></b></div><div class="proxy-skeleton"><span></span><i></i><b></b></div><div class="proxy-skeleton"><span></span><i></i><b></b></div></div>
+<div class="proxy-footer"><span>تُفتح روابط الإضافة داخل Telegram</span><details class="proxy-how"><summary>طريقة الاستخدام</summary><p>اضغط «إضافة إلى Telegram»، وافق على فتح التطبيق، ثم أكّد استخدام البروكسي من داخله.</p></details></div>
+</div></div></section>
 <section class="content-section" id="contact"><div class="wrap"><div class="section-head reveal"><div><h2>تواصل معي</h2></div><p>عندك فكرة أو مشروع أو فرصة تعاون؟ خلّينا نحچي.</p></div><div class="contact-layout"><div class="surface contact-intro reveal"><h3>لنبني شيئاً<br><span style="color:var(--lime)">له أثر.</span></h3><p>من تطوير البرمجيات إلى حلول الذكاء الاصطناعي، أرحّب بالتواصل مع أصحاب الأفكار والمشاريع الجادة.</p><div class="contact-status"><i style="width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime)"></i> متاح للعمل</div></div><div class="surface reveal"><div class="social-grid">
 <a class="social" href="https://wa.me/964787775597" target="_blank" rel="noopener" aria-label="فتح محادثة واتساب"><img src="https://cdn.simpleicons.org/whatsapp/25D366" alt="WhatsApp"><span><strong>WhatsApp</strong><small>اضغط لفتح المحادثة</small></span></a>
 <a class="social" href="https://t.me/l713i" target="_blank" rel="noopener noreferrer" aria-label="فتح حساب تيليجرام الشخصي"><img src="https://cdn.simpleicons.org/telegram/26A5E4" alt="Telegram"><span><strong>Telegram</strong><small>الحساب الشخصي</small></span></a>
@@ -256,51 +324,37 @@ if(!reduceMotion){resizeCanvas();draw();window.addEventListener('resize',resizeC
 })();
 
 
-/* Cached proxy directory API — shared edge cache protects upstream sources */
+/* Non-blocking Telegram proxy refresh: keep the last good list visible. */
 (()=>{
- const list=document.getElementById('proxy-live-list');
- const status=document.getElementById('proxy-live-status');
- if(!list||!status)return;
- let loading=false;
+ const list=document.getElementById('proxy-live-list'),status=document.getElementById('proxy-live-status'),button=document.getElementById('proxy-refresh-now'),chip=document.getElementById('proxy-state-chip'),chipLabel=document.getElementById('proxy-state-label'),progress=document.querySelector('.proxy-progress-track');
+ if(!list||!status||!button)return;
+ let loading=false,lastSuccess=0,lastAttempt=0;
  const escapeHtml=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
- async function refreshProxyList(){
-  if(loading)return;
-  loading=true;
-  status.innerHTML='<p>جارٍ تحديث قائمة البروكسيات…</p>';
-  try{
-   const response=await fetch('/api/telegram-proxies',{headers:{'Accept':'application/json'}});
-   if(!response.ok)throw new Error('proxy api unavailable');
-   const data=await response.json();
-   if(!Array.isArray(data.proxies)||!data.proxies.length)throw new Error('empty proxy list');
-   list.innerHTML=data.proxies.map((proxy,index)=>{
-    const href=String(proxy.href||'');
-    if(!href.startsWith('https://t.me/proxy?'))return '';
-    return '<article class="proxy-entry"><div><strong>'+escapeHtml(proxy.server||'Telegram MTProto')+'</strong><small>MTProto · Port '+escapeHtml(proxy.port||'—')+' · '+(index===0?'اختيار مقترح':'متاح للإضافة')+'</small></div><a href="'+escapeHtml(href)+'" target="_blank" rel="noopener noreferrer">فتح Telegram وإضافة البروكسي</a></article>';
-   }).join('');
-   if(!list.children.length)throw new Error('no valid links');
-   const updated=data.updatedAt?new Date(data.updatedAt).toLocaleString('ar-IQ',{dateStyle:'medium',timeStyle:'short'}):'الآن';
-   status.innerHTML='<p>تم تحميل '+list.children.length+' بروكسيات · المصدر: '+escapeHtml(data.source||'مصدر عام')+' · آخر تحديث: '+escapeHtml(updated)+'</p><button type="button" class="proxy-refresh-btn" id="proxy-refresh-now">تحديث البروكسيات</button>';
-  }catch(error){
-   status.innerHTML='<p>قائمة البروكسيات غير متاحة مؤقتاً. حاول مرة أخرى بعد قليل.</p><button type="button" class="proxy-refresh-btn" id="proxy-refresh-now">إعادة المحاولة</button>';
-   list.innerHTML='';
-  }finally{loading=false;}
+ const setState=(state,label)=>{if(chip)chip.dataset.state=state;if(chipLabel)chipLabel.textContent=label;};
+ const skeleton='<div class="proxy-skeleton"><span></span><i></i><b></b></div>'.repeat(3);
+ function render(proxies){
+  const cards=proxies.map((proxy,index)=>{let url;try{url=new URL(String(proxy.href||''));}catch{return '';}if(url.protocol!=='https:'||url.hostname!=='t.me'||url.pathname!=='/proxy')return '';return '<article class="proxy-entry"><div><strong>'+escapeHtml(proxy.server||'Telegram MTProto')+'</strong><small>MTProto · Port '+escapeHtml(proxy.port||'—')+' · '+(index===0?'خادم مقترح':'متاح للإضافة')+'</small></div><a href="'+escapeHtml(url.href)+'" target="_blank" rel="noopener noreferrer">إضافة إلى Telegram</a></article>';}).join('');
+  if(!cards)throw new Error('No valid proxy links');list.innerHTML=cards;list.setAttribute('aria-busy','false');
  }
- status.addEventListener('click',event=>{if(event.target&&event.target.id==='proxy-refresh-now')refreshProxyList();});
- refreshProxyList();
- setInterval(refreshProxyList,10*60*1000);
-})();;
+ async function refresh(){
+  if(loading)return;loading=true;lastAttempt=Date.now();button.disabled=true;button.classList.add('is-refreshing');button.setAttribute('aria-busy','true');if(progress)progress.classList.add('is-active');setState('loading','يتم التحديث');
+  status.textContent=list.querySelector('.proxy-entry')?'نتحقق من القائمة ونُبقي الخوادم الحالية ظاهرة…':'نجهّز قائمة الاتصال…';list.setAttribute('aria-busy','true');if(!list.children.length)list.innerHTML=skeleton;
+  try{
+   const response=await fetch('/api/telegram-proxies',{headers:{'Accept':'application/json'},cache:'no-store'});if(!response.ok)throw new Error('Proxy feed unavailable');const data=await response.json();if(!Array.isArray(data.proxies)||!data.proxies.length)throw new Error('Empty proxy feed');render(data.proxies);lastSuccess=Date.now();
+   const count=list.querySelectorAll('.proxy-entry').length,updated=data.updatedAt?new Date(data.updatedAt).toLocaleTimeString('ar-IQ',{hour:'2-digit',minute:'2-digit'}):'الآن';status.textContent='القائمة جاهزة · '+count+' خوادم · آخر تحديث '+updated;setState('ready','القائمة جاهزة');
+  }catch(error){
+   list.setAttribute('aria-busy','false');if(!list.querySelector('.proxy-entry'))list.innerHTML='<div class="proxy-empty"><span>تعذّر تحميل القائمة حالياً</span><small>اضغط تحديث القائمة للمحاولة مرة أخرى.</small></div>';status.textContent=list.querySelector('.proxy-entry')?'تعذّر التحديث الآن؛ ما زالت القائمة السابقة متاحة.':'تعذّر تحميل القائمة. حاول مجدداً بعد قليل.';setState('error','تعذّر التحديث');
+  }finally{loading=false;button.disabled=false;button.classList.remove('is-refreshing');button.removeAttribute('aria-busy');if(progress)progress.classList.remove('is-active');}
+ }
+ button.addEventListener('click',refresh);refresh();
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-Math.max(lastSuccess,lastAttempt)>10*60*1000)refresh();});
+ setInterval(()=>{if(!document.hidden)refresh();},10*60*1000);
+})();;;
 </script>
 <script>
 /* Always start at the hero on a fresh load/refresh; in-page links still work normally. */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 if (location.hash) history.replaceState(null, '', location.pathname + location.search);
 window.addEventListener('pageshow', () => window.scrollTo({top:0,left:0,behavior:'instant'}));
+</script>
 </body></html>
-<style>
-</style>
-
-<style>
-/* Official Tellonym logo from Wikimedia Commons */
-.social.tellonym-social{gap:12px}
-.social.tellonym-social img{display:block;width:34px;height:26px;min-width:34px;object-fit:contain;object-position:center}
-</style>
