@@ -68,3 +68,21 @@ test('Telegram proxy endpoint returns validated Telegram deep links', async () =
     global.fetch = originalFetch;
   }
 });
+
+test('SEO discovery files and Vercel configuration are valid', () => {
+  const vercel = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
+  assert.ok(vercel.headers.some(rule => rule.source === '/assets/(.*)'));
+  assert.match(fs.readFileSync(path.join(root, 'robots.txt'), 'utf8'), /Sitemap:/);
+  assert.match(fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8'), /<loc>https:\/\/laythaziz\.vercel\.app<\//);
+  assert.ok(fs.existsSync(path.join(root, 'assets/favicon.svg')));
+});
+
+test('all remembered public social destinations are present and open safely', () => {
+  for (const url of [
+    'https://www.tiktok.com/@i713l',
+    'https://youtube.com/@lynz317',
+    'https://www.facebook.com/share/1KYqkEC2yo/',
+    'https://github.com/LaythAziz'
+  ]) assert.ok(html.includes(url), 'Missing social URL: ' + url);
+  assert.doesNotMatch(html, /target="_blank"(?![^>]*rel="[^"]*noopener)/);
+});
