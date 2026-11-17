@@ -60,6 +60,7 @@ if(particlesEnabled&&canvas&&ctx){
  const formatPrice=(value,currency='IQD')=>Number(value||0)>0?Number(value).toLocaleString('en-US')+' '+(currency==='IQD'?'د.ع':currency):'السعر عند الطلب';
  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  async function loadCatalog(){
+  document.querySelectorAll('.offer-item').forEach(item=>{item.setAttribute('tabindex','0');item.setAttribute('role','button');});
   try{
    const response=await fetch('https://nbqvdvtaqvfwkcvmhled.supabase.co/rest/v1/services?select=service_code,name_ar,description_ar,price,currency,is_active&order=sort_order.asc',{
     headers:{apikey:'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn',Authorization:'Bearer sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'}
