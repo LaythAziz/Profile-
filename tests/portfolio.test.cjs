@@ -123,3 +123,9 @@ test('admin email OTP input accepts Supabase codes from 6 through 10 digits', ()
   assert.match(adminJs, /\/\^\\d\{6,10\}\$\//);
   assert.match(adminJs, /token,\s*type:\s*'email'/);
 });
+
+
+test('admin login uses a versioned script URL to bypass stale cached OTP validation', () => {
+  const adminHtml = fs.readFileSync(path.join(root, 'admin.html'), 'utf8');
+  assert.match(adminHtml, /src="\/assets\/admin\.js\?v=otp8-20261118"/);
+});
