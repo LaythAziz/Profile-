@@ -27,15 +27,15 @@ async function sendCode() {
   try {
     const { error } = await supabase.auth.signInWithOtp({
       email: OWNER_EMAIL,
-      options: { shouldCreateUser: true }
+      options: { shouldCreateUser: false }
     });
     if (error) throw error;
     requestForm.hidden = true;
     verifyForm.hidden = false;
     otpInput.focus();
-    message('إذا كان البريد مهيأً لاستقبال رسائل المشروع، ستصلك رسالة تحتوي رمزاً من 6 أرقام. تحقق أيضاً من Spam.');
+    message('تم إرسال رمز التحقق. افتح Gmail وانسخ الرمز المكوّن من 6 أرقام، ثم أدخله هنا.');
   } catch (error) {
-    message(error.message || 'تعذر إرسال الرمز. تحقق من إعدادات البريد وحاول لاحقاً.', true);
+    message(error.message || 'تعذر إرسال الرمز. انتظر قليلاً ثم حاول مجدداً، وتحقق من مجلد Spam.', true);
   } finally { busy(sendButton, false); }
 }
 
@@ -70,9 +70,7 @@ verifyForm.addEventListener('submit', async event => {
       throw new Error('تم التحقق من البريد، لكن هذا الحساب غير مسجل كمالك للوحة.');
     }
     message('تم التحقق بنجاح. صلاحية المالك مؤكدة.');
-    // The authenticated shell is intentionally not exposed until the protected
-    // admin dashboard routes and data actions are connected.
-    window.location.href = '/admin-dashboard.html';
+    window.location.replace('/admin-dashboard.html');
   } catch (error) {
     message(error.message || 'رمز غير صحيح أو منتهي الصلاحية.', true);
   } finally { busy(verifyButton, false); }
