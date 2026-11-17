@@ -11,3 +11,12 @@
 .service-delete-button{background:#2a1719!important;color:#ffaaaa!important;border:1px solid #74383d!important}
 .service-admin-row button{white-space:nowrap}
 @media(max-width:800px){.service-admin-row{grid-template-columns:28px minmax(90px,1fr) 70px 68px 48px 48px}.service-admin-row button{font-size:10px;padding:8px 3px}}
+
+/* Dashboard header placement and expanded service editor */
+.dashboard-header{direction:ltr}
+.dashboard-header>div{direction:rtl;text-align:right}
+.dashboard-header .back-link{order:1;margin-left:auto;margin-right:0}
+.service-admin-row{grid-template-columns:38px minmax(130px,1fr) minmax(150px,1.2fr) 100px 62px 82px 58px}
+.service-description-input{min-width:0;width:100%;border:1px solid var(--line);background:#080d10;color:var(--text);border-radius:8px;padding:9px;font:inherit}
+.service-visibility-button{background:#1c2b20!important;color:var(--accent)!important;border:1px solid #45652b!important}
+@media(max-width:800px){.service-admin-row{grid-template-columns:25px minmax(82px,1fr) minmax(95px,1fr) 65px 48px 62px 44px;gap:4px}.service-admin-row button{font-size:10px;padding:7px 2px}.service-description-input{padding:6px;font-size:10px}}
