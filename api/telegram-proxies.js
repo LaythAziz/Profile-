@@ -1,4 +1,4 @@
-// Vercel serverless endpoint: cache public Telegram proxy feeds at the edge.
+// Edge-cached Telegram proxy feed. Sources are queried in parallel; first valid feed wins.
 const SOURCES = [
   {
     name: "0xRadikal · Resilient",
@@ -31,7 +31,7 @@ function parseProxy(raw) {
     const secret = params.get("secret");
     if (
       !server || !port || !secret ||
-      !/^\d+$/.test(port) || Number(port) < 1 || Number(port) > 65535 ||
+      !/^\\d+$/.test(port) || Number(port) < 1 || Number(port) > 65535 ||
       !/^[a-zA-Z0-9_-]+$/.test(secret) ||
       server.length > 253
     ) return null;
@@ -46,6 +46,32 @@ function parseProxy(raw) {
   }
 }
 
+async function loadSource(source, controller) {
+  const timeout = setTimeout(() => controller.abort(), 3200);
+  try {
+    const response = await fetch(source.url, {
+      headers: { "User-Agent": "LaythAziz-Profile-ProxyDirectory/1.0" },
+      signal: controller.signal
+    });
+    if (!response.ok) throw new Error("Source unavailable");
+    const body = await response.text();
+    const unique = new Map();
+    for (const line of body.split(/\\r?\\n/)) {
+      const proxy = parseProxy(line);
+      if (proxy && !unique.has(proxy.key)) unique.set(proxy.key, proxy);
+      if (unique.size >= 8) break;
+    }
+    if (!unique.size) throw new Error("No valid proxies");
+    return {
+      source: source.name,
+      updatedAt: new Date().toISOString(),
+      proxies: [...unique.values()]
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "public, s-maxage=600, stale-while-revalidate=3600");
   res.setHeader("Vercel-CDN-Cache-Control", "public, s-maxage=600, stale-while-revalidate=3600");
@@ -56,33 +82,17 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  for (const source of SOURCES) {
-    try {
-      const upstream = await fetch(source.url, {
-        headers: { "User-Agent": "LaythAziz-Profile-ProxyDirectory/1.0" },
-        signal: AbortSignal.timeout(3500)
-      });
-      if (!upstream.ok) continue;
-      const body = await upstream.text();
-      const unique = new Map();
-      for (const line of body.split(/\r?\n/)) {
-        const proxy = parseProxy(line);
-        if (proxy && !unique.has(proxy.key)) unique.set(proxy.key, proxy);
-        if (unique.size >= 8) break;
-      }
-      if (!unique.size) continue;
-
-      return res.status(200).json({
-        source: source.name,
-        updatedAt: new Date().toISOString(),
-        proxies: [...unique.values()]
-      });
-    } catch {
-      // Try the next independent public source.
-    }
+  const controllers = SOURCES.map(() => new AbortController());
+  try {
+    const result = await Promise.any(
+      SOURCES.map((source, index) => loadSource(source, controllers[index]))
+    );
+    controllers.forEach(controller => controller.abort());
+    return res.status(200).json(result);
+  } catch {
+    controllers.forEach(controller => controller.abort());
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Vercel-CDN-Cache-Control", "no-store");
+    return res.status(503).json({ error: "Proxy list temporarily unavailable" });
   }
-
-  res.setHeader("Cache-Control", "no-store");
-  res.setHeader("Vercel-CDN-Cache-Control", "no-store");
-  return res.status(503).json({ error: "Proxy list temporarily unavailable" });
 };
