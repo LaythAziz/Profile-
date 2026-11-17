@@ -72,6 +72,7 @@ if(particlesEnabled&&canvas&&ctx){
     const service=byCode.get(code);
     if(!service){item.hidden=true;return;}
     item.dataset.serviceCode=service.service_code;
+    item.dataset.active=String(service.is_active);
     item.hidden=!service.is_active;
     const label=item.querySelectorAll('span')[1];
     if(label)label.textContent=service.name_ar+(service.description_ar?' — '+service.description_ar:'')+' · '+formatPrice(service.price,service.currency);
@@ -103,7 +104,7 @@ if(particlesEnabled&&canvas&&ctx){
   const query=search.value.trim().toLocaleLowerCase();
   groups.forEach(group=>{
    const items=[...group.querySelectorAll('.offer-item')];let matches=0;
-   items.forEach(item=>{const match=!query||item.textContent.toLocaleLowerCase().includes(query);item.hidden=!match;if(match)matches++;});
+   items.forEach(item=>{const match=item.dataset.active!=='false'&&(!query||item.textContent.toLocaleLowerCase().includes(query));item.hidden=!match;if(match)matches++;});
    group.hidden=matches===0;if(query&&matches)group.open=true;if(!query)group.open=false;
   });
  });
@@ -133,7 +134,8 @@ if(particlesEnabled&&canvas&&ctx){
    const telegram=document.getElementById('orderTelegram');
    if(telegram)telegram.href='https://t.me/share/url?url='+encodeURIComponent('https://laythaziz.vercel.app')+'&text='+encodeURIComponent(message);
    say('تم إنشاء الطلب بنجاح. احتفظ برقم الطلب.');
-   form.querySelector('button[type="submit"]').hidden=true;
+   form.querySelector('button[type="submit"]').hidden=false;
+   form.querySelector('button[type="submit"]').textContent='تأكيد طلب آخر';
   }catch(error){say(error.message||'تعذر إرسال الطلب. حاول لاحقاً.',true);}
   finally{button.disabled=false;button.textContent='تأكيد الطلب';}
  });
@@ -175,3 +177,6 @@ if(particlesEnabled&&canvas&&ctx){
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 if (location.hash) history.replaceState(null, '', location.pathname + location.search);
 window.addEventListener('pageshow', () => window.scrollTo({top:0,left:0,behavior:'auto'}));
+
+// Privacy-friendly page-view counter: stores only the page path, not personal identifiers.
+(()=>{if(document.visibilityState==='prerender')return;fetch('https://nbqvdvtaqvfwkcvmhled.supabase.co/functions/v1/track-profile-view',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_0CUY19touCOxCcF6hu7sFQ_MIMxNmRn'},body:JSON.stringify({path:location.pathname}),keepalive:true}).catch(()=>{});})();
