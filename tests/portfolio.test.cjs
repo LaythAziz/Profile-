@@ -44,23 +44,27 @@ test('Telegram proxy endpoint only serves GET requests', async () => {
   assert.equal(headers.Allow, 'GET');
 });
 
-test('Telegram proxy endpoint returns validated Telegram deep links', async () => {
+test('Telegram proxy endpoint falls back to a healthy source and returns validated deep links', async () => {
   const handler = require('../api/telegram-proxies');
   const originalFetch = global.fetch;
-  global.fetch = async () => ({
-    ok: true,
-    text: async () => [
-      'not-a-proxy',
-      'tg://proxy?server=proxy.example.com&port=443&secret=0123456789abcdef',
-      'tg://proxy?server=bad.example.com&port=99999&secret=0123456789abcdef'
-    ].join('\n')
-  });
+  global.fetch = async (url) => {
+    if (url.includes('0xRadikal')) return { ok: false, text: async () => '' };
+    return {
+      ok: true,
+      text: async () => [
+        'not-a-proxy',
+        'tg://proxy?server=proxy.example.com&port=443&secret=0123456789abcdef',
+        'tg://proxy?server=bad.example.com&port=99999&secret=0123456789abcdef'
+      ].join('\\n')
+    };
+  };
   const headers = {};
   let status;
   const response = { setHeader: (key, value) => { headers[key] = value; }, status(code) { status = code; return this; }, json(body) { this.body = body; return this; } };
   try {
     await handler({ method: 'GET' }, response);
     assert.equal(status, 200);
+    assert.equal(response.body.source, 'iwizard7 · Stable');
     assert.equal(response.body.proxies.length, 1);
     assert.match(response.body.proxies[0].href, /^https:\/\/t\.me\/proxy\?/);
     assert.match(headers['Vercel-CDN-Cache-Control'], /s-maxage=600/);
@@ -85,4 +89,20 @@ test('all remembered public social destinations are present and open safely', ()
     'https://github.com/LaythAziz'
   ]) assert.ok(html.includes(url), 'Missing social URL: ' + url);
   assert.doesNotMatch(html, /target="_blank"(?![^>]*rel="[^"]*noopener)/);
+});
+
+test('Telegram proxy endpoint returns a non-cacheable error when all sources fail', async () => {
+  const handler = require('../api/telegram-proxies');
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({ ok: false, text: async () => '' });
+  const headers = {};
+  let status;
+  const response = { setHeader: (key, value) => { headers[key] = value; }, status(code) { status = code; return this; }, json(body) { this.body = body; return this; } };
+  try {
+    await handler({ method: 'GET' }, response);
+    assert.equal(status, 503);
+    assert.match(headers['Cache-Control'], /no-store/);
+  } finally {
+    global.fetch = originalFetch;
+  }
 });
