@@ -16,8 +16,8 @@ test('checkout and payment details stay hidden until the user requests a service
 });
 
 test('page uses cacheable external CSS and deferred JavaScript assets', () => {
-  assert.match(html, /href="\\/assets\\/profile\\.css(?:\\?[^"]*)?"/);
-  assert.match(html, /src="\\/assets\\/profile\\.js(?:\\?[^"]*)?" defer/);
+  assert.match(html, /href="\/assets\/profile\.css(?:\?[^"]*)?"/);
+  assert.match(html, /src="\/assets\/profile\.js(?:\?[^"]*)?" defer/);
   assert.ok(fs.existsSync(path.join(root, 'assets/profile.css')));
   assert.ok(fs.existsSync(path.join(root, 'assets/profile.js')));
 });
